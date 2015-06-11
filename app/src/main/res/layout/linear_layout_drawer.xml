@@ -1,0 +1,61 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="240dp"
+    android:layout_height="match_parent"
+    android:id="@+id/drawer_linear_layout"
+    android:layout_gravity="start"
+    android:choiceMode="singleChoice"
+    android:divider="@android:color/transparent"
+    android:dividerHeight="0dp"
+    android:background="@color/background_material_dark"
+    android:orientation="vertical">
+
+    <Button android:id="@+id/button_dashboard"
+        android:text="Dashboard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
+    <Button android:id="@+id/button_my_blog"
+        android:text="My blog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
+    <Button android:id="@+id/button_my_likes"
+        android:text="My likes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
+    <Button android:id="@+id/button_following"
+        android:text="Following"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
+    <Button android:id="@+id/button_fullscreen"
+        android:text="Fullscreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
+    <Button android:id="@+id/button_settings"
+        android:text="Settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
+    <Button android:id="@+id/button_logout"
+        android:text="Logout   "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
+</LinearLayout>

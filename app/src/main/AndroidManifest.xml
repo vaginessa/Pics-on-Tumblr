@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.oleksiykovtun.picsontumblr.android" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!--
+    Icon generated: https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html#foreground.type=clipart&foreground.space.trim=0&foreground.space.pad=0.1&foreground.clipart=res%2Fclipart%2Ficons%2Fimage_panorama.svg&foreColor=00b4a3%2C100&crop=0&backgroundShape=square&backColor=636363%2C100&effects=shadow
+    -->
+    <application
+        android:name="com.oleksiykovtun.picsontumblr.android.App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.oleksiykovtun.picsontumblr.android.view.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <data android:host="*.tumblr.com"> </data>
+                <data android:scheme="http"></data>
+                <data android:pathPattern=".*"></data>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.oleksiykovtun.picsontumblr.android.view.AuthorizationActivity"
+            android:label="@string/app_name" />
+    </application>
+
+</manifest>
