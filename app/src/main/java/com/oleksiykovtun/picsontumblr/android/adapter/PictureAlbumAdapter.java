@@ -3,6 +3,8 @@ package com.oleksiykovtun.picsontumblr.android.adapter;
 import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.R;
+import com.oleksiykovtun.picsontumblr.android.model.PictureHistory;
 import com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 import com.oleksiykovtun.picsontumblr.android.view.PagerManager;
@@ -56,6 +59,22 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
         this.pictureAlbumModel = pictureAlbumModel;
         this.pictureAlbumRecyclerView = pictureAlbumRecyclerView;
         this.pictureAlbumRecyclerView.setLoadableRecyclerAdapter(this);
+        this.pictureAlbumRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                putLastPictureToHistory();
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+    }
+
+    private void putLastPictureToHistory() {
+        int position = ((LinearLayoutManager) (pictureAlbumRecyclerView.getLayoutManager())).
+                findFirstVisibleItemPosition();
+        if (position >= 0 && position < dataSet.size()) {
+            Picture lastCompletelyVisiblePicture = (Picture) dataSet.get(position);
+            PictureHistory.markShown(lastCompletelyVisiblePicture);
+        }
     }
 
     public class ViewHolder extends LoadableRecyclerAdapter.ViewHolder {
@@ -239,6 +258,9 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
         }
         if (picture.isRemoved()) {
             label += "     Removed";
+        }
+        if (PictureHistory.containsShown(picture)) {
+            label += "     #"; // already seen
         }
         ((ViewHolder) holder).timeTextView.setText(label);
         ((ViewHolder) holder).imageView.getLayoutParams().height = picture.getHeight();
