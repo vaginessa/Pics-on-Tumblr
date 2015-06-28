@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static MainActivity thisActivity = null;
     private Toolbar toolbar = null;
-    private PopupWindow followersPopupWindow = null;
+    private PopupWindow popupWindow = null;
     private ProgressWheel progressWheel;
     boolean aboutToExit = false;
 
@@ -46,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goBack(boolean closeWholePage) {
-        if (followersPopupWindow != null && followersPopupWindow.isShowing()) {
+        if (popupWindow != null && popupWindow.isShowing()) {
             Log.d("", "showing");
-            hideFollowersPopupWindow();
+            hidePopupWindow();
         } else if (isDrawerShowing()) {
             closeDrawer();
         } else if (PagerManager.getPager().getPageCount() == 0) {
@@ -228,10 +228,17 @@ public class MainActivity extends AppCompatActivity {
                 closeDrawer();
             }
         });
+        findViewById(R.id.button_followers).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAlbumCollectionPopupWindow("Followers");
+                closeDrawer();
+            }
+        });
         findViewById(R.id.button_following).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showFollowersPopupWindow();
+                showAlbumCollectionPopupWindow("Following");
                 closeDrawer();
             }
         });
@@ -258,33 +265,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void showFollowersPopupWindow() {
+    public void showAlbumCollectionPopupWindow(String name) {
         LayoutInflater inflater =
                 (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View followersView = inflater.inflate(R.layout.linear_layout_popup_following, null);
+        View albumCollectionView = inflater.inflate(R.layout.linear_layout_popup_window, null);
 
-        Toolbar toolbar = (Toolbar) followersView.findViewById(R.id.toolbar_popup);
-        toolbar.setTitle("Following");
+        Toolbar toolbar = (Toolbar) albumCollectionView.findViewById(R.id.toolbar_popup);
+        toolbar.setTitle(name);
 
         LoadableRecyclerView loadableRecyclerView =
-                (LoadableRecyclerView) followersView.findViewById(R.id.following_holder);
-        new AlbumCollectionAdapter(new AlbumCollection(), loadableRecyclerView).loadMore();
+                (LoadableRecyclerView) albumCollectionView.findViewById(R.id.album_collection_holder);
+        new AlbumCollectionAdapter(new AlbumCollection(name), loadableRecyclerView).loadMore();
 
-        if (followersPopupWindow != null) {
-            followersPopupWindow.dismiss();
+        // resetting
+        if (popupWindow != null) {
+            popupWindow.dismiss();
         }
-        followersPopupWindow = new PopupWindow(followersView,
+        // showing new window
+        popupWindow = new PopupWindow(albumCollectionView,
                 findViewById(R.id.dynamic_view_pager).getWidth(),
                 findViewById(R.id.dynamic_view_pager).getHeight(), true);
-        followersPopupWindow.setOutsideTouchable(true);
-        followersPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        followersPopupWindow.showAtLocation(findViewById(R.id.dynamic_view_pager), Gravity.CENTER,
-                0, 0);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        popupWindow.showAtLocation(findViewById(R.id.dynamic_view_pager), Gravity.CENTER, 0, 0);
     }
 
-    public void hideFollowersPopupWindow() {
-        if (followersPopupWindow != null) {
-            followersPopupWindow.dismiss();
+    public void hidePopupWindow() {
+        if (popupWindow != null) {
+            popupWindow.dismiss();
         }
         closeDrawer();
     }

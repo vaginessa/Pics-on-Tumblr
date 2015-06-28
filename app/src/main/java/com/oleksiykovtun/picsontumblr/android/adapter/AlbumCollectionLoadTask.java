@@ -10,7 +10,9 @@ import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 import com.oleksiykovtun.picsontumblr.android.R;
 import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
 import com.tumblr.jumblr.types.Blog;
+import com.tumblr.jumblr.types.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +35,23 @@ public class AlbumCollectionLoadTask extends AsyncTask<Void, String, String> {
             options.put("limit", loadingStep);
             options.put("offset",
                     followerRecyclerAdapter.getAlbumCollectionModel().getPictureAlbumList().size());
-            List<Blog> blogs = AccountManager.getAccountClient().userFollowing(options);
-            for (Blog blog : blogs) {
-                followerRecyclerAdapter.getAlbumCollectionModel().
-                        addPictureAlbum(new PictureAlbum(blog.getName()));
+
+            if (followerRecyclerAdapter.getAlbumCollectionModel().isFollowing()) {
+                List<Blog> blogs = AccountManager.getAccountClient().userFollowing(options);
+                for (Blog blog : blogs) {
+                    followerRecyclerAdapter.getAlbumCollectionModel().
+                            addPictureAlbum(new PictureAlbum(blog.getName()));
+                }
+
+            } else if (followerRecyclerAdapter.getAlbumCollectionModel().isFollowers()) {
+                String myBlogName =
+                        AccountManager.getAccountClient().user().getBlogs().get(0).getName();
+                List<User> followingUsers =
+                        AccountManager.getAccountClient().blogFollowers(myBlogName, options);
+                for (User user : followingUsers) {
+                    followerRecyclerAdapter.getAlbumCollectionModel().
+                            addPictureAlbum(new PictureAlbum(user.getName()));
+                }
             }
         } catch (Throwable e) {
             Log.e("Instantr", "Something was wrong, cancelling load", e);

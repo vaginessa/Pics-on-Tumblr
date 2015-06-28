@@ -1,67 +1,30 @@
 package com.oleksiykovtun.picsontumblr.android.model;
 
-import android.view.View;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Blog collection. Can be a set of following blogs, followed blogs, etc.
  */
 public class AlbumCollection {
 
+    private static final String FOLLOWING = "following";
+    private static final String FOLLOWERS = "followers";
+
     private String name;
     private List<PictureAlbum> pictureAlbumList = new ArrayList<>();
-    private int currentMaxPosts = 0;
-    private boolean showLikesInsteadOfPosts = false;
-    private boolean showRandomly = false;
-    private static Random random = new Random();
-    private int loadPostsStep = 10;
-    private boolean loading = true;
-    private View pictureBlogView = null;
-
-    public AlbumCollection() {
-    }
+    private boolean isFollowers;
+    private boolean isFollowing;
 
     public AlbumCollection(String name) {
         this.name = name;
-    }
-
-    public boolean isShowLikesInsteadOfPosts() {
-        return showLikesInsteadOfPosts;
-    }
-
-    public void setShowLikesInsteadOfPosts(boolean showLikesInsteadOfPosts) {
-        this.showLikesInsteadOfPosts = showLikesInsteadOfPosts;
-    }
-
-    public boolean isShowRandomly() {
-        return showRandomly;
-    }
-
-    public void setShowRandomly(boolean showRandomly) {
-        this.showRandomly = showRandomly;
-    }
-
-    public static Random getRandom() {
-        return random;
-    }
-
-    public static void setRandom(Random random) {
-        AlbumCollection.random = random;
-    }
-
-    public int getLoadPostsStep() {
-        return loadPostsStep;
-    }
-
-    public boolean isLoading() {
-        return loading;
-    }
-
-    public void setLoading(boolean loading) {
-        this.loading = loading;
+        if (name != null) {
+            if (name.toLowerCase().equals(FOLLOWING)) {
+                isFollowing = true;
+            } else if (name.toLowerCase().equals(FOLLOWERS)) {
+                isFollowers = true;
+            }
+        }
     }
 
     public String getName() {
@@ -70,6 +33,14 @@ public class AlbumCollection {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isFollowers() {
+        return isFollowers;
+    }
+
+    public boolean isFollowing() {
+        return isFollowing;
     }
 
     public List<PictureAlbum> getPictureAlbumList() {
@@ -84,23 +55,4 @@ public class AlbumCollection {
         this.pictureAlbumList.add(pictureAlbum);
     }
 
-    public int getCurrentMaxPosts() {
-        return currentMaxPosts;
-    }
-
-    public void setCurrentMaxPosts(int currentMaxPosts) {
-        this.currentMaxPosts = currentMaxPosts;
-    }
-
-    public void increaseCurrentMaxPosts(int delta) {
-        this.currentMaxPosts += delta;
-    }
-
-    public View getPictureBlogView() {
-        return pictureBlogView;
-    }
-
-    public void setPictureBlogView(View pictureBlogView) {
-        this.pictureBlogView = pictureBlogView;
-    }
 }

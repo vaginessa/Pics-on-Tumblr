@@ -68,7 +68,7 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
         viewHolder.textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.get().hideFollowersPopupWindow();
+                MainActivity.get().hidePopupWindow();
 
                 LayoutInflater inflater = (LayoutInflater) App.getContext()
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -110,7 +110,7 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
                             @Override
                             public void onClick(View v) {
                                 followerMenuDialog.dismiss();
-                                MainActivity.get().hideFollowersPopupWindow();
+                                MainActivity.get().hidePopupWindow();
                                 new PictureAlbumAdapter(new PictureAlbum(albumUrl),
                                         albumRecyclerView).loadMore();
                                 PagerManager.getPager().pushToPage(albumView,
@@ -122,7 +122,7 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
                             @Override
                             public void onClick(View v) {
                                 followerMenuDialog.dismiss();
-                                MainActivity.get().hideFollowersPopupWindow();
+                                MainActivity.get().hidePopupWindow();
                                 int newPagePosition = PagerManager.getPager().getCurrentPageNumber() + 1;
                                 new PictureAlbumAdapter(new PictureAlbum(albumUrl),
                                         albumRecyclerView).loadMore();

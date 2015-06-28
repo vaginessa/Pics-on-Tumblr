@@ -37,6 +37,13 @@
         android:textColor="@color/accent_material_dark"
         style="?android:attr/borderlessButtonStyle"/>
 
+    <Button android:id="@+id/button_followers"
+        android:text="Followers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
     <Button android:id="@+id/button_fullscreen"
         android:text="Fullscreen"
         android:layout_width="wrap_content"

@@ -40,7 +40,7 @@
             </android.support.v7.widget.CardView>
 
             <com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView
-                android:id="@+id/following_holder"
+                android:id="@+id/album_collection_holder"
                 android:scrollbars="vertical"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
