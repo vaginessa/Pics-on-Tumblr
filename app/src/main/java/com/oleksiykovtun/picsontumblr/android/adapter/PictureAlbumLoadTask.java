@@ -6,11 +6,11 @@ import android.util.Log;
 import android.view.View;
 
 import com.oleksiykovtun.picsontumblr.android.App;
+import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 import com.oleksiykovtun.picsontumblr.android.R;
 import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
-import com.oleksiykovtun.picsontumblr.android.view.PagerManager;
 import com.squareup.picasso.Picasso;
 import com.tumblr.jumblr.types.Blog;
 import com.tumblr.jumblr.types.Photo;
@@ -30,69 +30,78 @@ import java.util.Random;
  */
 public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
 
-    PictureAlbumAdapter pictureAlbumAdapter;
+    private PictureAlbumLoadListener pictureAlbumLoadListener;
+    private PictureAlbum pictureAlbum;
     private Blog blog = null;
 
-    public PictureAlbumLoadTask(PictureAlbumAdapter pictureAlbumAdapter) {
-        this.pictureAlbumAdapter = pictureAlbumAdapter;
+    public interface PictureAlbumLoadListener {
+
+        void onPictureAlbumPartLoaded(String albumName);
+    }
+
+    public PictureAlbumLoadTask(PictureAlbum pictureAlbum) {
+        this.pictureAlbum = pictureAlbum;
+    }
+
+    public void setOnPictureAlbumLoadListener(PictureAlbumLoadListener pictureAlbumLoadListener) {
+        this.pictureAlbumLoadListener = pictureAlbumLoadListener;
     }
 
     protected String doInBackground(Void... nothing) {
         try {
-            if (pictureAlbumAdapter.getPictureAlbumModel().getUrl().isEmpty()) {
-                pictureAlbumAdapter.getPictureAlbumModel().
+            if (pictureAlbum.getUrl().isEmpty()) {
+                pictureAlbum.
                         setUrl(AccountManager.getAccountClient().user().getBlogs().get(0).getName());
             }
-            Log.d("", "More of album: URL " + pictureAlbumAdapter.getPictureAlbumModel().getUrl());
-            blog = AccountManager.getAccountClient().blogInfo(pictureAlbumAdapter.
-                    getPictureAlbumModel().getUrl());
+            Log.d("", "More of album: URL " + pictureAlbum.getUrl());
+            blog = AccountManager.getAccountClient().blogInfo(pictureAlbum.getUrl());
             Map<String, Integer> options = new HashMap<>();
             int limit;
-            if (pictureAlbumAdapter.getPictureAlbumModel().isSearch()) {
+            if (pictureAlbum.isSearch()) {
                 limit = 20;
-            } else if (pictureAlbumAdapter.getPictureAlbumModel().isShowRandomly()) {
+            } else if (pictureAlbum.isShowRandomly()) {
                 limit = 2; // todo fix, should work when 1
             } else {
-                int postsLimit = pictureAlbumAdapter.getPictureAlbumModel().getPostsLimit();
+                int postsLimit = pictureAlbum.getPostsLimit();
                 int currentPostsCount =
-                        pictureAlbumAdapter.getPictureAlbumModel().getCurrentMaxPosts();
-                int postsLoadLimit = pictureAlbumAdapter.getPictureAlbumModel().getLoadPostsStep();
+                        pictureAlbum.getCurrentMaxPosts();
+                int postsLoadLimit = pictureAlbum.getLoadPostsStep();
                 limit = Math.max(0, Math.min(postsLoadLimit, postsLimit - currentPostsCount));
             }
             options.put("limit", limit);
             int blogItemCount = 0;
-            if (! pictureAlbumAdapter.getPictureAlbumModel().getUrl().equals("dashboard")) {
-                blogItemCount = pictureAlbumAdapter.getPictureAlbumModel().
+            if (! pictureAlbum.getUrl().equals("dashboard")) {
+                blogItemCount = pictureAlbum.
                         isShowLikesInsteadOfPosts() ? blog.getLikeCount() : blog.getPostCount();
                 Log.d("", "Likes/posts: " + blogItemCount);
             }
             // offset is set when the album is not search results
-            if (! pictureAlbumAdapter.getPictureAlbumModel().isSearch()) {
-                int offset = pictureAlbumAdapter.getPictureAlbumModel().isShowRandomly() ?
+            if (! pictureAlbum.isSearch()) {
+                int offset = pictureAlbum.isShowRandomly() ?
                         new Random().nextInt(blogItemCount) :
-                        pictureAlbumAdapter.getPictureAlbumModel().getCurrentMaxPosts();
+                        pictureAlbum.getCurrentMaxPosts();
                 options.put("offset", offset);
             }
             List<Post> posts;
             if (limit == 0) {
                 // no posts of the limit is 0
                 posts = new ArrayList<>();
-            } else if (pictureAlbumAdapter.getPictureAlbumModel().getUrl().equals("dashboard")) {
+            } else if (pictureAlbum.getUrl().equals("dashboard")) {
                 // likes don't apply to the dashboard
                 posts = AccountManager.getAccountClient().userDashboard(options);
-            } else if (pictureAlbumAdapter.getPictureAlbumModel().isSearch()) {
+            } else if (pictureAlbum.isSearch()) {
                 posts = AccountManager.getAccountClient().
-                        tagged(pictureAlbumAdapter.getPictureAlbumModel().getUrl(), options);
-            } else if (pictureAlbumAdapter.getPictureAlbumModel().isShowLikesInsteadOfPosts()) {
+                        tagged(pictureAlbum.getUrl(), options);
+            } else if (pictureAlbum.isShowLikesInsteadOfPosts()) {
                 posts = blog.likedPosts(options);
             } else {
                 posts = blog.posts(options);
             }
-            pictureAlbumAdapter.getPictureAlbumModel().increaseCurrentMaxPosts(limit);
+            pictureAlbum.increaseCurrentMaxPosts(limit);
             for (Post post : posts) {
                 if (post.getClass().equals(PhotoPost.class)) {
                     PhotoPost photoPost = (PhotoPost) post;
-                    pictureAlbumAdapter.getPictureAlbumModel().increaseCurrentPhotoPostCount(1);
+                    pictureAlbum.increaseCurrentPhotoPostCount(1);
                     for (Photo photo : photoPost.getPhotos()) {
                         Picture picture = new Picture();
                         picture.setIsLiked(photoPost.isLiked());
@@ -114,12 +123,12 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                             sourceUrl = "(none)";
                         }
                         picture.setOriginalBlogUrl(sourceUrl);
-                        picture.setCurrentBlogUrl(pictureAlbumAdapter.getPictureAlbumModel().getUrl());
+                        picture.setCurrentBlogUrl(pictureAlbum.getUrl());
                         picture.setPhotoPost(photoPost);
-                        picture.setPostNumber(pictureAlbumAdapter.getPictureAlbumModel().
+                        picture.setPostNumber(pictureAlbum.
                                 getCurrentPhotoPostCount());
                         Picasso.with(App.getContext()).load(picture.getUrl()).fetch(); // caching
-                        pictureAlbumAdapter.getPictureAlbumModel().addPicture(picture);
+                        pictureAlbum.addPicture(picture);
                     }
                 }
             }
@@ -134,28 +143,25 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
 
     protected void onCancelled() {
         Snackbar snackbar = Snackbar.make(MainActivity.get().findViewById(R.id.dynamic_view_pager),
-                "Error when showing " + pictureAlbumAdapter.getPictureAlbumModel().getUrl(),
+                "Error when showing " + pictureAlbum.getUrl(),
                 Snackbar.LENGTH_LONG).setAction("Repeat", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new PictureAlbumLoadTask(pictureAlbumAdapter).execute();
+                new PictureAlbumLoadTask(pictureAlbum).execute();
             }
         }).setActionTextColor(MainActivity.get().getResources().
                 getColor(R.color.accent_material_dark));
         snackbar.getView().setBackgroundColor(MainActivity.get().getResources().
                 getColor(R.color.teal_dark));
         snackbar.show();
-        pictureAlbumAdapter.getPictureAlbumModel().setLoading(false);
+        pictureAlbum.setLoading(false);
         onPostExecute("");
     }
 
     protected void onPostExecute(String result) {
-        if (pictureAlbumAdapter.getPictureAlbumRecyclerView() != null) {
-            ((View) pictureAlbumAdapter.getPictureAlbumRecyclerView().getParent()).setTag(
-                    blog == null ? pictureAlbumAdapter.getPictureAlbumModel().getUrl() : blog.getName());
-            MainActivity.get().hideProgressWheel();
-            PagerManager.getPager().onAction();
+        if (pictureAlbumLoadListener != null) {
+            String albumName = (blog == null) ? pictureAlbum.getUrl() : blog.getName();
+            pictureAlbumLoadListener.onPictureAlbumPartLoaded(albumName);
         }
-        pictureAlbumAdapter.notifyDataSetChanged();
     }
 }

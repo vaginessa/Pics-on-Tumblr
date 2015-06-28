@@ -32,14 +32,11 @@ import pl.droidsonroids.gif.GifImageView;
 /**
  * LoadableRecyclerAdapter for a blog with pictures
  */
-public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
+public class PictureAlbumAdapter extends LoadableRecyclerAdapter
+        implements PictureAlbumLoadTask.PictureAlbumLoadListener {
 
     private LoadableRecyclerView pictureAlbumRecyclerView;
-    private PictureAlbum pictureAlbumModel;
-
-    public PictureAlbum getPictureAlbumModel() {
-        return pictureAlbumModel;
-    }
+    private PictureAlbum pictureAlbum;
 
     public LoadableRecyclerView getPictureAlbumRecyclerView() {
         return pictureAlbumRecyclerView;
@@ -47,16 +44,18 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
 
     @Override
     public void loadMore() {
-        new PictureAlbumLoadTask(this).execute();
+        PictureAlbumLoadTask pictureAlbumLoadTask = new PictureAlbumLoadTask(pictureAlbum);
+        pictureAlbumLoadTask.setOnPictureAlbumLoadListener(this);
+        pictureAlbumLoadTask.execute();
     }
 
 
-    public PictureAlbumAdapter(PictureAlbum pictureAlbumModel,
+    public PictureAlbumAdapter(PictureAlbum pictureAlbum,
                                   LoadableRecyclerView pictureAlbumRecyclerView) {
-        super(pictureAlbumModel.getPictureList());
-        List dataSet = pictureAlbumModel.getPictureList();
+        super(pictureAlbum.getPictureList());
+        List dataSet = pictureAlbum.getPictureList();
         this.dataSet = dataSet;
-        this.pictureAlbumModel = pictureAlbumModel;
+        this.pictureAlbum = pictureAlbum;
         this.pictureAlbumRecyclerView = pictureAlbumRecyclerView;
         this.pictureAlbumRecyclerView.setLoadableRecyclerAdapter(this);
         this.pictureAlbumRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -74,6 +73,16 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
         if (position >= 0 && position < dataSet.size()) {
             Picture lastCompletelyVisiblePicture = (Picture) dataSet.get(position);
             PictureHistory.markShown(lastCompletelyVisiblePicture);
+        }
+    }
+
+    @Override
+    public void onPictureAlbumPartLoaded(String albumName) {
+        if (getPictureAlbumRecyclerView() != null) {
+            notifyDataSetChanged();
+            ((View) getPictureAlbumRecyclerView().getParent()).setTag(albumName);
+            MainActivity.get().hideProgressWheel();
+            PagerManager.getPager().onAction();
         }
     }
 
