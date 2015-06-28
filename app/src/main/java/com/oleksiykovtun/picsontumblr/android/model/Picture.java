@@ -26,6 +26,7 @@ public class Picture implements Serializable {
     private List<PhotoSize> photoSizes = new ArrayList<>();
     private int width;
     private int height; // todo multiple sizes
+    private int postNumber;
 
     public boolean isLiked() {
         return isLiked;
@@ -57,6 +58,14 @@ public class Picture implements Serializable {
 
     public void setPhotoPost(PhotoPost photoPost) {
         this.photoPost = photoPost;
+    }
+
+    public int getPostNumber() {
+        return postNumber;
+    }
+
+    public void setPostNumber(int postNumber) {
+        this.postNumber = postNumber;
     }
 
     public String getUrl() {

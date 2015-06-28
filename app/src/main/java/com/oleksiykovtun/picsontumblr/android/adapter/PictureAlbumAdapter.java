@@ -78,12 +78,14 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
     }
 
     public class ViewHolder extends LoadableRecyclerAdapter.ViewHolder {
-        public TextView timeTextView;
+        public TextView timestampTextView;
+        public TextView postNumberTextView;
         public GifImageView imageView;
 
         public ViewHolder(View view) {
             super(view);
-            timeTextView = (TextView) view.findViewById(R.id.picture_timestamp);
+            timestampTextView = (TextView) view.findViewById(R.id.picture_timestamp);
+            postNumberTextView = (TextView) view.findViewById(R.id.post_number);
             imageView = (GifImageView) view.findViewById(R.id.picture);
         }
 
@@ -129,11 +131,11 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
                         " " + picture.getOriginalBlogUrl());
                 final AlertDialog pictureMenuDialog =
                         new AlertDialog.Builder(new ContextThemeWrapper(
-                        MainActivity.get(), R.style.myDialog)).setView(pictureMenuLayout).create();
+                                MainActivity.get(), R.style.myDialog)).setView(pictureMenuLayout).create();
                 pictureMenuDialog.getWindow()
                         .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
                 pictureMenuDialog.show();
-                ((Button)pictureMenuDialog.findViewById(R.id.button_like)).setText(
+                ((Button) pictureMenuDialog.findViewById(R.id.button_like)).setText(
                         picture.isLiked() ? "Unlike" : "Like");
 
                 final View albumView = inflater.inflate(R.layout.linear_layout_picture_blog, null);
@@ -169,16 +171,16 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
                         });
                 pictureMenuDialog.findViewById(R.id.button_poster_blog_background_page).
                         setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                pictureMenuDialog.dismiss();
-                                int newPagePosition = PagerManager.getPager().getPageCount();
-                                new PictureAlbumAdapter(new PictureAlbum(
-                                        picture.getOriginalBlogUrl()), albumRecyclerView).loadMore();
-                                PagerManager.getPager().addPage(albumView, newPagePosition);
-                            }
-                        });
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        pictureMenuDialog.dismiss();
+                                        int newPagePosition = PagerManager.getPager().getPageCount();
+                                        new PictureAlbumAdapter(new PictureAlbum(
+                                                picture.getOriginalBlogUrl()), albumRecyclerView).loadMore();
+                                        PagerManager.getPager().addPage(albumView, newPagePosition);
+                                    }
+                                });
 
                 pictureMenuDialog.findViewById(R.id.button_like).setOnClickListener(
                         new View.OnClickListener() {
@@ -230,15 +232,15 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
                         });
                 pictureMenuDialog.findViewById(R.id.button_photo_background_page).
                         setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                pictureMenuDialog.dismiss();
-                                new PictureAdapter(picture, pictureRecyclerView);
-                                int newPagePosition = PagerManager.getPager().getPageCount();
-                                PagerManager.getPager().addPage(pictureView, newPagePosition);
-                            }
-                        });
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        pictureMenuDialog.dismiss();
+                                        new PictureAdapter(picture, pictureRecyclerView);
+                                        int newPagePosition = PagerManager.getPager().getPageCount();
+                                        PagerManager.getPager().addPage(pictureView, newPagePosition);
+                                    }
+                                });
                 return false;
             }
         });
@@ -250,6 +252,9 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
         final Picture picture = (Picture) (dataSet.get(position));
         String label = new SimpleDateFormat("yyyy-MM-dd HH:mm")
                 .format(picture.getTimestamp() * 1000);
+        if (PictureHistory.containsShown(picture)) {
+            label += "     Viewed";
+        }
         if (picture.isLiked()) {
             label += "     Liked";
         }
@@ -259,10 +264,8 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter {
         if (picture.isRemoved()) {
             label += "     Removed";
         }
-        if (PictureHistory.containsShown(picture)) {
-            label += "     #"; // already seen
-        }
-        ((ViewHolder) holder).timeTextView.setText(label);
+        ((ViewHolder) holder).timestampTextView.setText(label);
+        ((ViewHolder) holder).postNumberTextView.setText("" + picture.getPostNumber());
         ((ViewHolder) holder).imageView.getLayoutParams().height = picture.getHeight();
         ((ViewHolder) holder).imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         Picasso.with(App.getContext()).load(picture.getUrl())

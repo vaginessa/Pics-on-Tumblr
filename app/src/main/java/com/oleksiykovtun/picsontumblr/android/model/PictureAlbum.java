@@ -9,9 +9,15 @@ import java.util.Random;
  */
 public class PictureAlbum {
 
+    private static final String DASHBOARD = "dashboard";
+    private static final int DASHBOARD_LIMIT = 250;
+    private static final int LIKES_LIMIT = 1000;
+
     private String url;
     private List<Picture> pictureList = new ArrayList<>();
-    private int currentMaxPosts = 0;
+    private int currentMaxPosts = 0; // currently loaded posts within the limit
+    private int currentPhotoPostCount = 0;
+    private int postsLimit = Integer.MAX_VALUE;
     private boolean showLikesInsteadOfPosts = false;
     private boolean search = false;
     private boolean showRandomly = false;
@@ -21,10 +27,16 @@ public class PictureAlbum {
 
     public PictureAlbum(String url) {
         this.url = url;
+        if (url != null && url.equals(DASHBOARD)) {
+            setPostsLimit(DASHBOARD_LIMIT);
+        }
     }
 
     public PictureAlbum likesMode(boolean showLikesInsteadOfPosts) {
         this.showLikesInsteadOfPosts = showLikesInsteadOfPosts;
+        if (showLikesInsteadOfPosts) {
+            setPostsLimit(LIKES_LIMIT);
+        }
         return this;
     }
 
@@ -82,6 +94,14 @@ public class PictureAlbum {
         this.loading = loading;
     }
 
+    public int getPostsLimit() {
+        return postsLimit;
+    }
+
+    public void setPostsLimit(int postsLimit) {
+        this.postsLimit = postsLimit;
+    }
+
     public String getUrl() {
         return url;
     }
@@ -114,4 +134,15 @@ public class PictureAlbum {
         this.currentMaxPosts += delta;
     }
 
+    public int getCurrentPhotoPostCount() {
+        return currentPhotoPostCount;
+    }
+
+    public void setCurrentPhotoPostCount(int currentPhotoPostCount) {
+        this.currentPhotoPostCount = currentPhotoPostCount;
+    }
+
+    public void increaseCurrentPhotoPostCount(int delta) {
+        this.currentPhotoPostCount += delta;
+    }
 }

@@ -5,11 +5,13 @@ import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 
+import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 import com.oleksiykovtun.picsontumblr.android.R;
 import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
 import com.oleksiykovtun.picsontumblr.android.view.PagerManager;
+import com.squareup.picasso.Picasso;
 import com.tumblr.jumblr.types.Blog;
 import com.tumblr.jumblr.types.Photo;
 import com.tumblr.jumblr.types.PhotoPost;
@@ -17,6 +19,7 @@ import com.tumblr.jumblr.types.PhotoSize;
 import com.tumblr.jumblr.types.Post;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,18 +50,23 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
             int limit;
             if (pictureAlbumAdapter.getPictureAlbumModel().isSearch()) {
                 limit = 20;
+            } else if (pictureAlbumAdapter.getPictureAlbumModel().isShowRandomly()) {
+                limit = 2; // todo fix, should work when 1
             } else {
-                limit = pictureAlbumAdapter.getPictureAlbumModel().isShowRandomly() ? // todo fix 2 at once
-                        2 : pictureAlbumAdapter.getPictureAlbumModel().getLoadPostsStep();
+                int postsLimit = pictureAlbumAdapter.getPictureAlbumModel().getPostsLimit();
+                int currentPostsCount =
+                        pictureAlbumAdapter.getPictureAlbumModel().getCurrentMaxPosts();
+                int postsLoadLimit = pictureAlbumAdapter.getPictureAlbumModel().getLoadPostsStep();
+                limit = Math.max(0, Math.min(postsLoadLimit, postsLimit - currentPostsCount));
             }
             options.put("limit", limit);
             int blogItemCount = 0;
             if (! pictureAlbumAdapter.getPictureAlbumModel().getUrl().equals("dashboard")) {
                 blogItemCount = pictureAlbumAdapter.getPictureAlbumModel().
-                        isShowLikesInsteadOfPosts() ? Math.min(blog.getLikeCount(), 1000) :
-                        blog.getPostCount();
+                        isShowLikesInsteadOfPosts() ? blog.getLikeCount() : blog.getPostCount();
                 Log.d("", "Likes/posts: " + blogItemCount);
             }
+            // offset is set when the album is not search results
             if (! pictureAlbumAdapter.getPictureAlbumModel().isSearch()) {
                 int offset = pictureAlbumAdapter.getPictureAlbumModel().isShowRandomly() ?
                         new Random().nextInt(blogItemCount) :
@@ -66,8 +74,11 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                 options.put("offset", offset);
             }
             List<Post> posts;
-            // likes don't apply to the dashboard
-            if (pictureAlbumAdapter.getPictureAlbumModel().getUrl().equals("dashboard")) {
+            if (limit == 0) {
+                // no posts of the limit is 0
+                posts = new ArrayList<>();
+            } else if (pictureAlbumAdapter.getPictureAlbumModel().getUrl().equals("dashboard")) {
+                // likes don't apply to the dashboard
                 posts = AccountManager.getAccountClient().userDashboard(options);
             } else if (pictureAlbumAdapter.getPictureAlbumModel().isSearch()) {
                 posts = AccountManager.getAccountClient().
@@ -77,13 +88,11 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
             } else {
                 posts = blog.posts(options);
             }
-            pictureAlbumAdapter.getPictureAlbumModel().increaseCurrentMaxPosts(
-                    pictureAlbumAdapter.getPictureAlbumModel().isShowRandomly() ?
-                            2 : pictureAlbumAdapter.getPictureAlbumModel().getLoadPostsStep());
+            pictureAlbumAdapter.getPictureAlbumModel().increaseCurrentMaxPosts(limit);
             for (Post post : posts) {
                 if (post.getClass().equals(PhotoPost.class)) {
                     PhotoPost photoPost = (PhotoPost) post;
-
+                    pictureAlbumAdapter.getPictureAlbumModel().increaseCurrentPhotoPostCount(1);
                     for (Photo photo : photoPost.getPhotos()) {
                         Picture picture = new Picture();
                         picture.setIsLiked(photoPost.isLiked());
@@ -107,6 +116,9 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                         picture.setOriginalBlogUrl(sourceUrl);
                         picture.setCurrentBlogUrl(pictureAlbumAdapter.getPictureAlbumModel().getUrl());
                         picture.setPhotoPost(photoPost);
+                        picture.setPostNumber(pictureAlbumAdapter.getPictureAlbumModel().
+                                getCurrentPhotoPostCount());
+                        Picasso.with(App.getContext()).load(picture.getUrl()).fetch(); // caching
                         pictureAlbumAdapter.getPictureAlbumModel().addPicture(picture);
                     }
                 }

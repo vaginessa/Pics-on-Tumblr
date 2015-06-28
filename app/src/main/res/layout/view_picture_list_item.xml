@@ -4,11 +4,29 @@
     android:layout_height="wrap_content"
     android:background="@color/background_material_dark">
 
-    <TextView
-        android:id="@+id/picture_timestamp"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/darker_gray" />
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/picture_timestamp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/post_number"
+            android:layout_toStartOf="@+id/post_number"
+            android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/post_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:textColor="@android:color/darker_gray" />
+
+    </RelativeLayout>
+
+
 
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/picture"
