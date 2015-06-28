@@ -49,7 +49,6 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
         pictureAlbumLoadTask.execute();
     }
 
-
     public PictureAlbumAdapter(PictureAlbum pictureAlbum,
                                   LoadableRecyclerView pictureAlbumRecyclerView) {
         super(pictureAlbum.getPictureList());

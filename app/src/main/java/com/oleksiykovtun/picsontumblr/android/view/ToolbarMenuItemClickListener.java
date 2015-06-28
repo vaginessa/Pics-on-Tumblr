@@ -28,7 +28,7 @@ public class ToolbarMenuItemClickListener implements Toolbar.OnMenuItemClickList
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
-        } else if (id == R.id.action_custom_blog) {
+        } else if (id == R.id.action_reblog_stats) {
             LayoutInflater inflater = (LayoutInflater) App.getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final View openBlogMenuLayout =

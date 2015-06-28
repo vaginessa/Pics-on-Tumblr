@@ -12,7 +12,6 @@ import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
 import com.tumblr.jumblr.types.Blog;
 import com.tumblr.jumblr.types.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ import java.util.Map;
 public class AlbumCollectionLoadTask extends AsyncTask<Void, String, String> {
 
     private AlbumCollectionAdapter followerRecyclerAdapter;
-    private int loadingStep = 25;
+    private int loadingStep = 20;
 
     public AlbumCollectionLoadTask(AlbumCollectionAdapter followerRecyclerAdapter) {
         this.followerRecyclerAdapter = followerRecyclerAdapter;
@@ -34,23 +33,29 @@ public class AlbumCollectionLoadTask extends AsyncTask<Void, String, String> {
             Map<String, Integer> options = new HashMap<>();
             options.put("limit", loadingStep);
             options.put("offset",
-                    followerRecyclerAdapter.getAlbumCollectionModel().getPictureAlbumList().size());
+                    followerRecyclerAdapter.getAlbumCollection().getPictureAlbumList().size());
 
-            if (followerRecyclerAdapter.getAlbumCollectionModel().isFollowing()) {
+            if (followerRecyclerAdapter.getAlbumCollection().isFollowing()) {
                 List<Blog> blogs = AccountManager.getAccountClient().userFollowing(options);
                 for (Blog blog : blogs) {
-                    followerRecyclerAdapter.getAlbumCollectionModel().
-                            addPictureAlbum(new PictureAlbum(blog.getName()));
+                    PictureAlbum pictureAlbum = new PictureAlbum(blog.getName());
+                    if (!followerRecyclerAdapter.getAlbumCollection().getPictureAlbumList().
+                            contains(pictureAlbum)) {
+                        followerRecyclerAdapter.getAlbumCollection().addPictureAlbum(pictureAlbum);
+                    }
                 }
 
-            } else if (followerRecyclerAdapter.getAlbumCollectionModel().isFollowers()) {
+            } else if (followerRecyclerAdapter.getAlbumCollection().isFollowers()) {
                 String myBlogName =
                         AccountManager.getAccountClient().user().getBlogs().get(0).getName();
                 List<User> followingUsers =
                         AccountManager.getAccountClient().blogFollowers(myBlogName, options);
                 for (User user : followingUsers) {
-                    followerRecyclerAdapter.getAlbumCollectionModel().
-                            addPictureAlbum(new PictureAlbum(user.getName()));
+                    PictureAlbum pictureAlbum = new PictureAlbum(user.getName());
+                    if (!followerRecyclerAdapter.getAlbumCollection().getPictureAlbumList().
+                            contains(pictureAlbum)) {
+                        followerRecyclerAdapter.getAlbumCollection().addPictureAlbum(pictureAlbum);
+                    }
                 }
             }
         } catch (Throwable e) {

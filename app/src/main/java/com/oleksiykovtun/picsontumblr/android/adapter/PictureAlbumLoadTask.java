@@ -82,6 +82,7 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                         pictureAlbum.getCurrentMaxPosts();
                 options.put("offset", offset);
             }
+            options.put("reblog_info", 1);
             List<Post> posts;
             if (limit == 0) {
                 // no posts of the limit is 0
@@ -89,13 +90,17 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
             } else if (pictureAlbum.getUrl().equals("dashboard")) {
                 // likes don't apply to the dashboard
                 posts = AccountManager.getAccountClient().userDashboard(options);
+                // posts limit is set automatically
             } else if (pictureAlbum.isSearch()) {
                 posts = AccountManager.getAccountClient().
                         tagged(pictureAlbum.getUrl(), options);
+                // no posts limit here, it's search
             } else if (pictureAlbum.isShowLikesInsteadOfPosts()) {
                 posts = blog.likedPosts(options);
+                pictureAlbum.setPostsLimit(blog.getLikeCount()); // limiting posts to actual likes count
             } else {
                 posts = blog.posts(options);
+                pictureAlbum.setPostsLimit(blog.getPostCount()); // limiting posts to actual posts count
             }
             pictureAlbum.increaseCurrentMaxPosts(limit);
             for (Post post : posts) {
@@ -114,6 +119,13 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                         picture.setPostUrl(photoPost.getPostUrl());
 
                         // setting blog and source of this picture
+                        String rebloggedFromUrl = photoPost.getRebloggedFromName();
+                        if (rebloggedFromUrl == null) {
+                            // this means, the picture was originally in the current blog
+                            rebloggedFromUrl = photoPost.getBlogName();
+                        }
+                        picture.setCurrentBlogUrl(rebloggedFromUrl);
+
                         String sourceUrl = photoPost.getSourceUrl();
                         if (sourceUrl != null) {
                             try {
@@ -123,11 +135,10 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                             }
                         }
                         if (sourceUrl == null) {
-                            // this means, the picture is originally in the current blog
-                            sourceUrl = photoPost.getBlogName();
+                            // this means, the picture was originally in that blog
+                            sourceUrl = rebloggedFromUrl;
                         }
                         picture.setOriginalBlogUrl(sourceUrl);
-                        picture.setCurrentBlogUrl(photoPost.getBlogName());
 
                         picture.setPhotoPost(photoPost);
                         picture.setPostNumber(pictureAlbum.getCurrentPhotoPostCount());

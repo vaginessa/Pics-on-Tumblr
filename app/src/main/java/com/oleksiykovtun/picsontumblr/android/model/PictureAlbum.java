@@ -12,24 +12,39 @@ public class PictureAlbum {
     private static final String DASHBOARD = "dashboard";
     private static final int DASHBOARD_LIMIT = 250;
     private static final int LIKES_LIMIT = 1000;
+    private static final int ABSOLUTE_LIMIT = 10000;
 
     private String url;
     private List<Picture> pictureList = new ArrayList<>();
     private int currentMaxPosts = 0; // currently loaded posts within the limit
     private int currentPhotoPostCount = 0;
-    private int postsLimit = Integer.MAX_VALUE;
+    private int postsLimit = ABSOLUTE_LIMIT;
     private boolean showLikesInsteadOfPosts = false;
     private boolean search = false;
     private boolean showRandomly = false;
     private static Random random = new Random();
     private int loadPostsStep = 10;
     private boolean loading = true;
+    private double reblogStatsValue = 0;
+    private double likesStatsValue = 0;
 
     public PictureAlbum(String url) {
         this.url = url;
         if (url != null && url.equals(DASHBOARD)) {
             setPostsLimit(DASHBOARD_LIMIT);
         }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return (other != null) && (other instanceof PictureAlbum) && (getUrl() != null) &&
+                (((PictureAlbum)other).getUrl() != null) &&
+                (getUrl().equals(((PictureAlbum) other).getUrl()));
+    }
+
+    @Override
+    public int hashCode() {
+        return (getUrl() != null) ? getUrl().hashCode() : 0;
     }
 
     public PictureAlbum likesMode(boolean showLikesInsteadOfPosts) {
@@ -48,6 +63,22 @@ public class PictureAlbum {
     public PictureAlbum searchMode(boolean search) {
         this.search = search;
         return this;
+    }
+
+    public double getLikesStatsValue() {
+        return likesStatsValue;
+    }
+
+    public void setLikesStatsValue(double likesStatsValue) {
+        this.likesStatsValue = likesStatsValue;
+    }
+
+    public double getReblogStatsValue() {
+        return reblogStatsValue;
+    }
+
+    public void setReblogStatsValue(double reblogStatsValue) {
+        this.reblogStatsValue = reblogStatsValue;
     }
 
     public boolean isSearch() {
@@ -99,7 +130,14 @@ public class PictureAlbum {
     }
 
     public void setPostsLimit(int postsLimit) {
-        this.postsLimit = postsLimit;
+        this.postsLimit = Math.min(ABSOLUTE_LIMIT, postsLimit);
+        // restricting
+        if (url != null && url.equals(DASHBOARD)) {
+            this.postsLimit = Math.min(DASHBOARD_LIMIT, postsLimit);
+        }
+        if (showLikesInsteadOfPosts) {
+            this.postsLimit = Math.min(LIKES_LIMIT, postsLimit);
+        }
     }
 
     public String getUrl() {

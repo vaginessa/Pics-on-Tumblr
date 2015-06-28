@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.PopupWindow;
@@ -47,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void goBack(boolean closeWholePage) {
         if (popupWindow != null && popupWindow.isShowing()) {
-            Log.d("", "showing");
             hidePopupWindow();
         } else if (isDrawerShowing()) {
             closeDrawer();
@@ -270,12 +270,31 @@ public class MainActivity extends AppCompatActivity {
                 (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View albumCollectionView = inflater.inflate(R.layout.linear_layout_popup_window, null);
 
-        Toolbar toolbar = (Toolbar) albumCollectionView.findViewById(R.id.toolbar_popup);
-        toolbar.setTitle(name);
-
         LoadableRecyclerView loadableRecyclerView =
                 (LoadableRecyclerView) albumCollectionView.findViewById(R.id.album_collection_holder);
-        new AlbumCollectionAdapter(new AlbumCollection(name), loadableRecyclerView).loadMore();
+        final AlbumCollectionAdapter albumCollectionAdapter =
+                new AlbumCollectionAdapter(new AlbumCollection(name), loadableRecyclerView);
+        albumCollectionAdapter.loadMore();
+
+        Toolbar toolbar = (Toolbar) albumCollectionView.findViewById(R.id.toolbar_popup);
+        toolbar.setTitle(name);
+        toolbar.inflateMenu(R.menu.menu_collection);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) { // now only one item
+                switch (item.getItemId()) {
+                    case R.id.action_reblog_stats:
+                        albumCollectionAdapter.resetStats(false);
+                        albumCollectionAdapter.loadStatistics();
+                        break;
+                    case R.id.action_likes_stats:
+                        albumCollectionAdapter.resetStats(true);
+                        albumCollectionAdapter.loadStatistics();
+                        break;
+                }
+                return false;
+            }
+        });
 
         // resetting
         if (popupWindow != null) {
@@ -288,6 +307,12 @@ public class MainActivity extends AppCompatActivity {
         popupWindow.setOutsideTouchable(true);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popupWindow.showAtLocation(findViewById(R.id.dynamic_view_pager), Gravity.CENTER, 0, 0);
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                AlbumCollectionAdapter.stopBatchLoading(); // heavy loading tasks should not continue
+            }
+        });
     }
 
     public void hidePopupWindow() {
@@ -330,6 +355,12 @@ public class MainActivity extends AppCompatActivity {
 
     public String readPreferences(String label, String defaultValue) {
         return getSharedPreferences("", Context.MODE_PRIVATE).getString(label, defaultValue);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        AlbumCollectionAdapter.stopBatchLoading(); // heavy loading tasks should not continue
     }
 
     @Override

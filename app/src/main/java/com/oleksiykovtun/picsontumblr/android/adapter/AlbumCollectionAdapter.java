@@ -3,6 +3,7 @@ package com.oleksiykovtun.picsontumblr.android.adapter;
 import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,20 +26,24 @@ import java.util.List;
 public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
 
     private LoadableRecyclerView albumCollectionRecyclerView;
-    private AlbumCollection albumCollectionModel;
+    private AlbumCollection albumCollection;
+    private PictureAlbum myAlbumForStats;
+    private static boolean batchLoading;
+    private boolean statsOfLikesInsteadOfPosts;
 
-    public AlbumCollection getAlbumCollectionModel() {
-        return albumCollectionModel;
+    public AlbumCollection getAlbumCollection() {
+        return albumCollection;
     }
 
-    public AlbumCollectionAdapter(AlbumCollection albumCollectionModel,
+    public AlbumCollectionAdapter(AlbumCollection albumCollection,
                                   LoadableRecyclerView albumCollectionRecyclerView) {
-        super(albumCollectionModel.getPictureAlbumList());
-        List dataSet = albumCollectionModel.getPictureAlbumList();
+        super(albumCollection.getPictureAlbumList());
+        List dataSet = albumCollection.getPictureAlbumList();
         this.dataSet = dataSet;
-        this.albumCollectionModel = albumCollectionModel;
+        this.albumCollection = albumCollection;
         this.albumCollectionRecyclerView = albumCollectionRecyclerView;
         this.albumCollectionRecyclerView.setLoadableRecyclerAdapter(this);
+        myAlbumForStats = new PictureAlbum("");
     }
 
     @Override
@@ -46,26 +51,88 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
         new AlbumCollectionLoadTask(this).execute();
     }
 
+    public static void stopBatchLoading() {
+        batchLoading = false;
+        Log.d("", "batch loading stopped");
+    }
+
+    public void resetStats(boolean statsOfLikesInsteadOfPosts) {
+        this.statsOfLikesInsteadOfPosts = statsOfLikesInsteadOfPosts;
+        myAlbumForStats = new PictureAlbum("");
+        myAlbumForStats = myAlbumForStats.likesMode(statsOfLikesInsteadOfPosts);
+    }
+
+    private void updateStatistics() {
+        // counting reblogs/likes per blog
+        double[] statsCountsPerBlog = new double[albumCollection.getPictureAlbumList().size()];
+        for (int i = 0; i < myAlbumForStats.getPictureList().size(); ++i) {
+            String pictureRebloggedName = myAlbumForStats.getPictureList().get(i).getOriginalBlogUrl();
+            for (int j = 0; j < albumCollection.getPictureAlbumList().size(); ++j) {
+                if (albumCollection.getPictureAlbumList().get(j).getUrl().equals(pictureRebloggedName)) {
+                    ++statsCountsPerBlog[j];
+                    break;
+                }
+            }
+        }
+        // saving
+        for (int j = 0; j < albumCollection.getPictureAlbumList().size(); ++j) {
+            if (statsOfLikesInsteadOfPosts) {
+                albumCollection.getPictureAlbumList().get(j).
+                        setLikesStatsValue(statsCountsPerBlog[j]);
+            } else {
+                albumCollection.getPictureAlbumList().get(j).
+                        setReblogStatsValue(statsCountsPerBlog[j]);
+            }
+        }
+    }
+
+    public void loadStatistics() {
+        // will load all "my" blog and count post origins in it
+        PictureAlbumLoadTask pictureAlbumLoadTask = new PictureAlbumLoadTask(myAlbumForStats);
+        pictureAlbumLoadTask.setOnPictureAlbumLoadListener(new PictureAlbumLoadTask.PictureAlbumLoadListener() {
+            @Override
+            public void onPictureAlbumPartLoaded(String albumName) {
+                // update statistics
+                Log.d("", "Statistics: got " + myAlbumForStats.getCurrentMaxPosts() + " of " +
+                        myAlbumForStats.getPostsLimit());
+                updateStatistics();
+                notifyDataSetChanged();
+
+                // load more until end
+                if (myAlbumForStats.getCurrentMaxPosts() < myAlbumForStats.getPostsLimit() &&
+                        batchLoading) {
+                    loadStatistics();
+                }
+            }
+        });
+        pictureAlbumLoadTask.execute();
+        batchLoading = true;
+    }
+
     public class ViewHolder extends LoadableRecyclerAdapter.ViewHolder {
-        public TextView textView;
+        public TextView nameTextView;
+        public TextView reblogStatsTextView;
+        public TextView likesStatsTextView;
 
         public ViewHolder(View view) {
             super(view);
-            textView = (TextView) view.findViewById(R.id.text);
+            nameTextView = (TextView) view.findViewById(R.id.name);
+            reblogStatsTextView = (TextView) view.findViewById(R.id.reblog_stats);
+            likesStatsTextView = (TextView) view.findViewById(R.id.likes_stats);
         }
 
     }
 
     private int getPosition(ViewHolder viewHolder) {
-        return Integer.parseInt("" + viewHolder.textView.getTag());
+        return Integer.parseInt("" + viewHolder.nameTextView.getTag());
     }
 
     @Override
     public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         final ViewHolder viewHolder = new ViewHolder(LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.view_following_list_item, parent, false));
+                        .inflate(R.layout.view_collection_list_item, parent, false));
 
-        viewHolder.textView.setOnClickListener(new View.OnClickListener() {
+        viewHolder.nameTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MainActivity.get().hidePopupWindow();
@@ -83,7 +150,7 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
             }
         });
 
-        viewHolder.textView.setOnLongClickListener(new View.OnLongClickListener() {
+        viewHolder.nameTextView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 final String albumUrl = ((PictureAlbum) dataSet.get(getPosition(viewHolder))).
@@ -150,8 +217,17 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
 
     @Override
     public void onBindViewHolder(LoadableRecyclerAdapter.ViewHolder holder, int position) {
-        ((ViewHolder) holder).textView.setTag(position);
-        ((ViewHolder) holder).textView.setText(((PictureAlbum) dataSet.get(position)).getUrl());
+        PictureAlbum pictureAlbum = (PictureAlbum) dataSet.get(position);
+                ((ViewHolder) holder).nameTextView.setTag(position);
+        ((ViewHolder) holder).nameTextView.setText(pictureAlbum.getUrl());
+        if (pictureAlbum.getReblogStatsValue() > 0) {
+            ((ViewHolder) holder).reblogStatsTextView.
+                    setText((int) pictureAlbum.getReblogStatsValue() + " reblogged");
+        }
+        if (pictureAlbum.getLikesStatsValue() > 0) {
+            ((ViewHolder) holder).likesStatsTextView.
+                    setText((int) pictureAlbum.getLikesStatsValue() + " liked");
+        }
     }
 
 }

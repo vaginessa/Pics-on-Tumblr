@@ -7,6 +7,8 @@
     <string name="action_search">Search</string>
     <string name="action_custom_blog">Go to</string>
     <string name="action_close_page">Close page</string>
+    <string name="action_reblog_stats">Reblogs statistics</string>
+    <string name="action_likes_stats">Likes statistics</string>
 
     <string name="action_poster_blog_new_page">Poster\'s blog in new page</string>
     <string name="action_poster_blog">Poster\'s blog</string>
