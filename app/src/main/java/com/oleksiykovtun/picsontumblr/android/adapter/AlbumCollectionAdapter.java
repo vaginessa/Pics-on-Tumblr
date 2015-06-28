@@ -66,9 +66,9 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
         // counting reblogs/likes per blog
         double[] statsCountsPerBlog = new double[albumCollection.getPictureAlbumList().size()];
         for (int i = 0; i < myAlbumForStats.getPictureList().size(); ++i) {
-            String pictureRebloggedName = myAlbumForStats.getPictureList().get(i).getOriginalBlogUrl();
+            String pictureOriginName = myAlbumForStats.getPictureList().get(i).getCurrentBlogUrl();
             for (int j = 0; j < albumCollection.getPictureAlbumList().size(); ++j) {
-                if (albumCollection.getPictureAlbumList().get(j).getUrl().equals(pictureRebloggedName)) {
+                if (albumCollection.getPictureAlbumList().get(j).getUrl().equals(pictureOriginName)) {
                     ++statsCountsPerBlog[j];
                     break;
                 }
@@ -223,10 +223,14 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
         if (pictureAlbum.getReblogStatsValue() > 0) {
             ((ViewHolder) holder).reblogStatsTextView.
                     setText((int) pictureAlbum.getReblogStatsValue() + " reblogged");
+        } else {
+            ((ViewHolder) holder).reblogStatsTextView.setText("");
         }
         if (pictureAlbum.getLikesStatsValue() > 0) {
             ((ViewHolder) holder).likesStatsTextView.
                     setText((int) pictureAlbum.getLikesStatsValue() + " liked");
+        } else {
+            ((ViewHolder) holder).likesStatsTextView.setText("");
         }
     }
 

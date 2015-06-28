@@ -50,8 +50,9 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
     protected String doInBackground(Void... nothing) {
         try {
             if (pictureAlbum.getUrl().isEmpty()) {
-                pictureAlbum.
-                        setUrl(AccountManager.getAccountClient().user().getBlogs().get(0).getName());
+                String myBlogName =
+                        AccountManager.getAccountClient().user().getBlogs().get(0).getName();
+                pictureAlbum.setUrl(myBlogName);
             }
             Log.d("", "More of album: URL " + pictureAlbum.getUrl());
             blog = AccountManager.getAccountClient().blogInfo(pictureAlbum.getUrl());
@@ -120,7 +121,7 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
 
                         // setting blog and source of this picture
                         String rebloggedFromUrl = photoPost.getRebloggedFromName();
-                        if (rebloggedFromUrl == null) {
+                        if (rebloggedFromUrl == null || pictureAlbum.isShowLikesInsteadOfPosts()) {
                             // this means, the picture was originally in the current blog
                             rebloggedFromUrl = photoPost.getBlogName();
                         }
