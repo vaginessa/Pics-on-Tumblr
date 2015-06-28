@@ -112,21 +112,26 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                         picture.setWidth(size.getWidth());
                         picture.setHeight(size.getHeight());
                         picture.setPostUrl(photoPost.getPostUrl());
-                        String sourceUrl = "(none)";
-                        try {
-                            sourceUrl = photoPost.getSourceUrl();
-                            sourceUrl = new URL(sourceUrl).getHost();
-                        } catch (Throwable e) {
-                            Log.e("", "failed to parse source url " + sourceUrl, e);
+
+                        // setting blog and source of this picture
+                        String sourceUrl = photoPost.getSourceUrl();
+                        if (sourceUrl != null) {
+                            try {
+                                sourceUrl = new URL(sourceUrl).getHost().replace(".tumblr.com", "");
+                            } catch (Throwable e) {
+                                // the URL will be not formatted in this case
+                            }
                         }
                         if (sourceUrl == null) {
-                            sourceUrl = "(none)";
+                            // this means, the picture is originally in the current blog
+                            sourceUrl = photoPost.getBlogName();
                         }
                         picture.setOriginalBlogUrl(sourceUrl);
-                        picture.setCurrentBlogUrl(pictureAlbum.getUrl());
+                        picture.setCurrentBlogUrl(photoPost.getBlogName());
+
                         picture.setPhotoPost(photoPost);
-                        picture.setPostNumber(pictureAlbum.
-                                getCurrentPhotoPostCount());
+                        picture.setPostNumber(pictureAlbum.getCurrentPhotoPostCount());
+
                         Picasso.with(App.getContext()).load(picture.getUrl()).fetch(); // caching
                         pictureAlbum.addPicture(picture);
                     }

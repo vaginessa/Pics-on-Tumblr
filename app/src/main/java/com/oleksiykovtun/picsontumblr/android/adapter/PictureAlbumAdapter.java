@@ -136,8 +136,14 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View pictureMenuLayout =
                         inflater.inflate(R.layout.linear_layout_menu_blog_picture, null);
-                ((TextView) pictureMenuLayout.findViewById(R.id.label_poster_blog)).append(
-                        " " + picture.getOriginalBlogUrl());
+
+                TextView originTextView =
+                        (TextView) pictureMenuLayout.findViewById(R.id.label_poster_blog);
+                originTextView.setText("By " + picture.getOriginalBlogUrl());
+                if (!picture.getOriginalBlogUrl().equals(picture.getCurrentBlogUrl())) {
+                    originTextView.append(" (in " + picture.getCurrentBlogUrl() + "'s blog)");
+                }
+
                 final AlertDialog pictureMenuDialog =
                         new AlertDialog.Builder(new ContextThemeWrapper(
                                 MainActivity.get(), R.style.myDialog)).setView(pictureMenuLayout).create();

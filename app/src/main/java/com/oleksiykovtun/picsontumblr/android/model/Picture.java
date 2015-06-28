@@ -116,12 +116,12 @@ public class Picture implements Serializable {
         this.originalBlogUrl = originalBlogUrl;
     }
 
-    public String getCurrentBlogUrl() {
-        return currentBlogUrl;
-    }
-
     public void setCurrentBlogUrl(String currentBlogUrl) {
         this.currentBlogUrl = currentBlogUrl;
+    }
+
+    public String getCurrentBlogUrl() {
+        return currentBlogUrl;
     }
 
     public boolean isReblogged() {
