@@ -111,12 +111,14 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
 
     public class ViewHolder extends LoadableRecyclerAdapter.ViewHolder {
         public TextView nameTextView;
+        public TextView visitTimeTextView;
         public TextView reblogStatsTextView;
         public TextView likesStatsTextView;
 
         public ViewHolder(View view) {
             super(view);
             nameTextView = (TextView) view.findViewById(R.id.name);
+            visitTimeTextView = (TextView) view.findViewById(R.id.visit_time);
             reblogStatsTextView = (TextView) view.findViewById(R.id.reblog_stats);
             likesStatsTextView = (TextView) view.findViewById(R.id.likes_stats);
         }
@@ -232,6 +234,25 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter {
         } else {
             ((ViewHolder) holder).likesStatsTextView.setText("");
         }
+        String visitTimeText = "";
+        long millisSinceLastVisit = System.currentTimeMillis() - pictureAlbum.getLastVisitTime();
+        long minutesSinceLastVisit = millisSinceLastVisit / 1000 / 60;
+        if (minutesSinceLastVisit == 0) {
+            visitTimeText = "just now";
+        } else {
+            long hoursSinceLastVisit = minutesSinceLastVisit / 60;
+            if (hoursSinceLastVisit == 0) {
+                visitTimeText = minutesSinceLastVisit + " min ago";
+            } else {
+                long daysSinceLastVisit = hoursSinceLastVisit / 24;
+                if (daysSinceLastVisit == 0) {
+                    visitTimeText = hoursSinceLastVisit + " hrs ago";
+                } else if (daysSinceLastVisit < 10000) { // more is considered never
+                    visitTimeText = daysSinceLastVisit + " days ago";
+                }
+            }
+        }
+        ((ViewHolder) holder).visitTimeTextView.setText(visitTimeText);
     }
 
 }

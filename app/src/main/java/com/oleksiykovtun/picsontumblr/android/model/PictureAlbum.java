@@ -27,6 +27,7 @@ public class PictureAlbum {
     private boolean loading = true;
     private double reblogStatsValue = 0;
     private double likesStatsValue = 0;
+    private long lastVisitTime = 0; // considered never, by default
 
     public PictureAlbum(String url) {
         this.url = url;
@@ -63,6 +64,14 @@ public class PictureAlbum {
     public PictureAlbum searchMode(boolean search) {
         this.search = search;
         return this;
+    }
+
+    public long getLastVisitTime() {
+        return lastVisitTime;
+    }
+
+    public void setLastVisitTime(long lastVisitTime) {
+        this.lastVisitTime = lastVisitTime;
     }
 
     public double getLikesStatsValue() {

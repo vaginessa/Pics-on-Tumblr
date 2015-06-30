@@ -39,6 +39,7 @@ public class AlbumCollectionLoadTask extends AsyncTask<Void, String, String> {
                 List<Blog> blogs = AccountManager.getAccountClient().userFollowing(options);
                 for (Blog blog : blogs) {
                     PictureAlbum pictureAlbum = new PictureAlbum(blog.getName());
+                    pictureAlbum.setLastVisitTime(AlbumHistoryManager.getLastVisitTime(blog.getName()));
                     if (!followerRecyclerAdapter.getAlbumCollection().getPictureAlbumList().
                             contains(pictureAlbum)) {
                         followerRecyclerAdapter.getAlbumCollection().addPictureAlbum(pictureAlbum);
@@ -52,6 +53,7 @@ public class AlbumCollectionLoadTask extends AsyncTask<Void, String, String> {
                         AccountManager.getAccountClient().blogFollowers(myBlogName, options);
                 for (User user : followingUsers) {
                     PictureAlbum pictureAlbum = new PictureAlbum(user.getName());
+                    pictureAlbum.setLastVisitTime(AlbumHistoryManager.getLastVisitTime(user.getName()));
                     if (!followerRecyclerAdapter.getAlbumCollection().getPictureAlbumList().
                             contains(pictureAlbum)) {
                         followerRecyclerAdapter.getAlbumCollection().addPictureAlbum(pictureAlbum);
