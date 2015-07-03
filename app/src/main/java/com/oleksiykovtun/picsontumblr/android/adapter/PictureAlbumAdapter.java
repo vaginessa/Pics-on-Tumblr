@@ -265,9 +265,12 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
     public void onBindViewHolder(LoadableRecyclerAdapter.ViewHolder holder, int position) {
         final Picture picture = (Picture) (dataSet.get(position));
         String label = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-                .format(picture.getTimestamp() * 1000);
+                .format(picture.getTimestamp());
         if (PictureHistory.containsShown(picture)) {
             label += "     Viewed";
+            if (picture.getTimestamp() < pictureAlbum.getLastVisitTime()) {
+                label += " before";
+            }
         }
         if (picture.isLiked()) {
             label += "     Liked";

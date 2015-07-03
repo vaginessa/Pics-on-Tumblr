@@ -111,7 +111,7 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                     for (Photo photo : photoPost.getPhotos()) {
                         Picture picture = new Picture();
                         picture.setIsLiked(photoPost.isLiked());
-                        picture.setTimestamp(photoPost.getTimestamp());
+                        picture.setTimestamp(photoPost.getTimestamp() * 1000); // from seconds to millis
                         PhotoSize size = photo.getSizes().get(Math.max(0, photo.getSizes().size() - 5));
                         picture.setPhotoSizes(photo.getSizes());
                         picture.setUrl(size.getUrl());

@@ -1,5 +1,7 @@
 package com.oleksiykovtun.picsontumblr.android.model;
 
+import com.oleksiykovtun.picsontumblr.android.adapter.AlbumHistoryManager;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -33,6 +35,10 @@ public class PictureAlbum {
         this.url = url;
         if (url != null && url.equals(DASHBOARD)) {
             setPostsLimit(DASHBOARD_LIMIT);
+        }
+        // last visit time does not apply to my blog when opened from the menu (with empty URL)
+        if (url != null && !url.isEmpty()) {
+            setLastVisitTime(AlbumHistoryManager.getLastVisitTime(url));
         }
     }
 
