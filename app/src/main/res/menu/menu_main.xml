@@ -1,37 +1,56 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity"
+    >
 
     <item android:id="@+id/action_reblog_stats"
         android:icon="@mipmap/ic_launch_white_24dp"
         android:title="@string/action_custom_blog"
         android:orderInCategory="10"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        />
 
     <item android:id="@+id/action_search"
         android:icon="@mipmap/ic_search_white_24dp"
         android:title="@string/action_search"
         android:orderInCategory="20"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        />
 
     <item android:id="@+id/action_follow"
         android:title="@string/action_follow"
         android:orderInCategory="50"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        />
 
     <item android:id="@+id/action_unfollow"
         android:title="@string/action_unfollow"
         android:orderInCategory="60"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        />
+
+    <item android:id="@+id/action_more_columns"
+        android:title="@string/action_more_columns"
+        android:orderInCategory="70"
+        app:showAsAction="never"
+        />
+
+    <item android:id="@+id/action_less_columns"
+        android:title="@string/action_less_columns"
+        android:orderInCategory="80"
+        app:showAsAction="never"
+        />
 
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
-        android:orderInCategory="80"
-        app:showAsAction="never" />
+        android:orderInCategory="90"
+        app:showAsAction="never"
+        />
 
     <item android:id="@+id/action_close_page"
         android:title="@string/action_close_page"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        />
 
 </menu>

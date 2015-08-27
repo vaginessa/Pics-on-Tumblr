@@ -7,7 +7,7 @@ import android.view.View;
 
 import com.oleksiykovtun.android.dynamicviewpager.DynamicViewPager;
 import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.adapter.AlbumHistoryManager;
+import com.oleksiykovtun.picsontumblr.android.adapter.manager.AlbumHistoryManager;
 
 /**
  * DynamicViewPager with action event processing support

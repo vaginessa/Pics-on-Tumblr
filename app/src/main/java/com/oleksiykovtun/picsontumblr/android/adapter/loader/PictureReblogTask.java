@@ -1,4 +1,4 @@
-package com.oleksiykovtun.picsontumblr.android.adapter;
+package com.oleksiykovtun.picsontumblr.android.adapter.loader;
 
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
@@ -6,34 +6,33 @@ import android.util.Log;
 import android.view.View;
 
 import com.oleksiykovtun.picsontumblr.android.R;
+import com.oleksiykovtun.picsontumblr.android.adapter.LoadableRecyclerAdapter;
+import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 
 /**
- * The AsyncTask for liking a post which contains the picture
+ * The AsyncTask for reblogging a post which contains the picture
  */
-public class PictureLikeTask extends AsyncTask<Void, String, String> {
+public class PictureReblogTask extends AsyncTask<Void, String, String> {
 
     private LoadableRecyclerAdapter recyclerAdapter;
     private Picture picture;
 
-    public PictureLikeTask(LoadableRecyclerAdapter recyclerAdapter, Picture picture) {
+    public PictureReblogTask(LoadableRecyclerAdapter recyclerAdapter, Picture picture) {
         this.recyclerAdapter = recyclerAdapter;
         this.picture = picture;
     }
 
     protected String doInBackground(Void... nothing) {
         try {
-            if (picture.isLiked()) {
-                picture.getPhotoPost().unlike();
-                picture.setIsLiked(false);
-            } else {
-                picture.getPhotoPost().like();
-                picture.setIsLiked(true);
-            }
-            // todo also add/remove all post from my blog view likes, update in other blogs
+            picture.reblog(AccountManager.getAccountClient().user().getBlogs().get(0).
+                    getName());
+            picture.setIsReblogged(true);
+            picture.setIsRemoved(false);
+            // todo also add all post to my blog view
         } catch (Throwable e) {
-            Log.e("", "Picture liking failed", e);
+            Log.e("", "Picture reblogging failed", e);
             cancel(true);
         }
         return "";
@@ -41,11 +40,11 @@ public class PictureLikeTask extends AsyncTask<Void, String, String> {
 
     protected void onCancelled() {
         Snackbar snackbar = Snackbar.make(MainActivity.get().findViewById(R.id.dynamic_view_pager),
-                "Error when liking",
+                "Error when reblogging",
                 Snackbar.LENGTH_LONG).setAction("Retry", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new PictureLikeTask(recyclerAdapter, picture).execute();
+                new PictureReblogTask(recyclerAdapter, picture).execute();
             }
         }).setActionTextColor(MainActivity.get().getResources().
                 getColor(R.color.accent_material_dark));

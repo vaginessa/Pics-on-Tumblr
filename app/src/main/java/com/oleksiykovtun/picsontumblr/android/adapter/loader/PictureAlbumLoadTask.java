@@ -1,4 +1,4 @@
-package com.oleksiykovtun.picsontumblr.android.adapter;
+package com.oleksiykovtun.picsontumblr.android.adapter.loader;
 
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
@@ -79,7 +79,7 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
             // offset is set when the album is not search results
             if (! pictureAlbum.isSearch()) {
                 int offset = pictureAlbum.isShowRandomly() ?
-                        new Random().nextInt(blogItemCount) :
+                        new Random().nextInt(pictureAlbum.getPostsLimit()) :
                         pictureAlbum.getCurrentMaxPosts();
                 options.put("offset", offset);
             }
@@ -112,11 +112,7 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                         Picture picture = new Picture();
                         picture.setIsLiked(photoPost.isLiked());
                         picture.setTimestamp(photoPost.getTimestamp() * 1000); // from seconds to millis
-                        PhotoSize size = photo.getSizes().get(Math.max(0, photo.getSizes().size() - 5));
                         picture.setPhotoSizes(photo.getSizes());
-                        picture.setUrl(size.getUrl());
-                        picture.setWidth(size.getWidth());
-                        picture.setHeight(size.getHeight());
                         picture.setPostUrl(photoPost.getPostUrl());
 
                         // setting blog and source of this picture
@@ -144,7 +140,6 @@ public class PictureAlbumLoadTask extends AsyncTask<Void, String, String> {
                         picture.setPhotoPost(photoPost);
                         picture.setPostNumber(pictureAlbum.getCurrentPhotoPostCount());
 
-                        Picasso.with(App.getContext()).load(picture.getUrl()).fetch(); // caching
                         pictureAlbum.addPicture(picture);
                     }
                 }

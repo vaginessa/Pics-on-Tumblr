@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.AlbumCollectionLoadTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureAlbumLoadTask;
 import com.oleksiykovtun.picsontumblr.android.model.AlbumCollection;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView;

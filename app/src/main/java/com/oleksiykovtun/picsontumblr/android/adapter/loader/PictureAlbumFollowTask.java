@@ -1,4 +1,4 @@
-package com.oleksiykovtun.picsontumblr.android.adapter;
+package com.oleksiykovtun.picsontumblr.android.adapter.loader;
 
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;

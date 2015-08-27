@@ -1,6 +1,7 @@
 package com.oleksiykovtun.picsontumblr.android.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
@@ -12,8 +13,14 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.koushikdutta.ion.Ion;
 import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureLikeTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureReblogTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureRemoveTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.manager.PictureLoadManager;
+import com.oleksiykovtun.picsontumblr.android.adapter.manager.PictureSizeManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView;
@@ -27,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import it.sephiroth.android.library.imagezoom.ImageViewTouch;
+import it.sephiroth.android.library.imagezoom.ImageViewTouchBase;
 
 /**
  * LoadableRecyclerAdapter for a picture (single item in the list for toolbar hiding support)
@@ -35,6 +43,7 @@ public class PictureAdapter extends LoadableRecyclerAdapter {
 
     private LoadableRecyclerView pictureRecyclerView;
     private Picture pictureModel;
+    private Drawable previewDrawable;
 
     public Picture getPictureModel() {
         return pictureModel;
@@ -45,11 +54,12 @@ public class PictureAdapter extends LoadableRecyclerAdapter {
     }
 
     public PictureAdapter(Picture pictureModel,
-                          LoadableRecyclerView pictureRecyclerView) {
+                          LoadableRecyclerView pictureRecyclerView, Drawable previewDrawable) {
         super(Arrays.asList(pictureModel));
         List dataSet = Arrays.asList(pictureModel);
         this.dataSet = dataSet;
         this.pictureModel = pictureModel;
+        this.previewDrawable = previewDrawable;
         this.pictureRecyclerView = pictureRecyclerView;
         this.pictureRecyclerView.setLoadableRecyclerAdapter(this);
         notifyDataSetChanged();
@@ -209,12 +219,32 @@ public class PictureAdapter extends LoadableRecyclerAdapter {
     }
 
     @Override
+    public void onViewRecycled (final LoadableRecyclerAdapter.ViewHolder holder) {
+        ((ViewHolder) holder).imageView.destroyDrawingCache();
+        super.onViewRecycled(holder);
+    }
+
+    @Override
     public void onBindViewHolder(LoadableRecyclerAdapter.ViewHolder holder, int position) {
-        final Picture picture = (Picture) (dataSet.get(position));
-        Picasso.with(App.getContext()).load(picture.getPhotoSizes().get(
-                Math.max(0, picture.getPhotoSizes().size() - 6)).getUrl())
-                .into(((ViewHolder) holder).imageView);
         ((ViewHolder) holder).imageView.setTag(position);
+        loadPictureIntoPosition(((ViewHolder) holder).imageView, position);
+    }
+
+    private void loadPictureIntoPosition(ImageViewTouch imageView, int position) {
+        Picture picture = (Picture) (dataSet.get(position));
+        imageView.setDisplayType(ImageViewTouchBase.DisplayType.FIT_TO_SCREEN);
+
+        PictureLoadManager.loadFromUrl(getPictureUrl(picture), imageView, previewDrawable);
+
+        imageView.setTag(position);
+    }
+
+    private int getDesiredPictureWidth() {
+        return 2 * pictureRecyclerView.getColumnWidth();
+    }
+
+    private String getPictureUrl(Picture picture) {
+        return PictureSizeManager.getImageUrlForWidth(picture, getDesiredPictureWidth());
     }
 
 }

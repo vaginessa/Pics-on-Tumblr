@@ -1,6 +1,6 @@
 package com.oleksiykovtun.picsontumblr.android.model;
 
-import com.oleksiykovtun.picsontumblr.android.adapter.AlbumHistoryManager;
+import com.oleksiykovtun.picsontumblr.android.adapter.manager.AlbumHistoryManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class PictureAlbum {
     private boolean search = false;
     private boolean showRandomly = false;
     private static Random random = new Random();
-    private int loadPostsStep = 10;
+    private int loadPostsStep = 20;
     private boolean loading = true;
     private double reblogStatsValue = 0;
     private double likesStatsValue = 0;

@@ -15,7 +15,7 @@ import android.widget.EditText;
 import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
 import com.oleksiykovtun.picsontumblr.android.adapter.PictureAlbumAdapter;
-import com.oleksiykovtun.picsontumblr.android.adapter.PictureAlbumFollowTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureAlbumFollowTask;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 
 /**
@@ -64,6 +64,16 @@ public class ToolbarMenuItemClickListener implements Toolbar.OnMenuItemClickList
             new PictureAlbumFollowTask(true, MainActivity.get().getToolbarTitle()).execute();
         } else if (id == R.id.action_unfollow) {
             new PictureAlbumFollowTask(false, MainActivity.get().getToolbarTitle()).execute();
+        } else if (id == R.id.action_more_columns) {
+            View albumView = PagerManager.getPager().getCurrentView();
+            LoadableRecyclerView recyclerView =
+                    (LoadableRecyclerView) albumView.findViewById(R.id.picture_holder);
+            recyclerView.setColumnCount(recyclerView.getColumnCount() + 1);
+        } else if (id == R.id.action_less_columns) {
+            View albumView = PagerManager.getPager().getCurrentView();
+            LoadableRecyclerView recyclerView =
+                    (LoadableRecyclerView) albumView.findViewById(R.id.picture_holder);
+            recyclerView.setColumnCount(recyclerView.getColumnCount() - 1);
         } else if (id == R.id.action_search) {
             LayoutInflater inflater = (LayoutInflater) App.getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

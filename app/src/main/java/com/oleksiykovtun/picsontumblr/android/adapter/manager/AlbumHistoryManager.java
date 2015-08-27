@@ -1,4 +1,4 @@
-package com.oleksiykovtun.picsontumblr.android.adapter;
+package com.oleksiykovtun.picsontumblr.android.adapter.manager;
 
 
 import android.content.Context;
@@ -24,10 +24,10 @@ public class AlbumHistoryManager {
                 protected Void doInBackground(Void... params) {
                     try {
                         Thread.sleep(500);
+                        App.getContext().getSharedPreferences("", Context.MODE_PRIVATE).edit().
+                                putLong(TIMESTAMP_PREFIX + pictureAlbumName, System.currentTimeMillis()).
+                                commit();
                     } catch (Throwable e) { }
-                    App.getContext().getSharedPreferences("", Context.MODE_PRIVATE).edit().
-                            putLong(TIMESTAMP_PREFIX + pictureAlbumName, System.currentTimeMillis()).
-                            commit();
                     return null;
                 }
 

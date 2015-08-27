@@ -1,4 +1,4 @@
-package com.oleksiykovtun.picsontumblr.android.adapter;
+package com.oleksiykovtun.picsontumblr.android.adapter.manager;
 
 import android.app.Activity;
 import android.content.Context;

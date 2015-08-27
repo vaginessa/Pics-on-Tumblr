@@ -1,4 +1,4 @@
-package com.oleksiykovtun.picsontumblr.android.adapter;
+package com.oleksiykovtun.picsontumblr.android.adapter.loader;
 
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
@@ -6,31 +6,35 @@ import android.util.Log;
 import android.view.View;
 
 import com.oleksiykovtun.picsontumblr.android.R;
+import com.oleksiykovtun.picsontumblr.android.adapter.LoadableRecyclerAdapter;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 
 /**
- * The AsyncTask for removing a post which contains the picture
+ * The AsyncTask for liking a post which contains the picture
  */
-public class PictureRemoveTask extends AsyncTask<Void, String, String> {
+public class PictureLikeTask extends AsyncTask<Void, String, String> {
 
     private LoadableRecyclerAdapter recyclerAdapter;
     private Picture picture;
 
-    public PictureRemoveTask(LoadableRecyclerAdapter recyclerAdapter, Picture picture) {
+    public PictureLikeTask(LoadableRecyclerAdapter recyclerAdapter, Picture picture) {
         this.recyclerAdapter = recyclerAdapter;
         this.picture = picture;
     }
 
     protected String doInBackground(Void... nothing) {
         try {
-            // todo check top notes, if I was there and reblogged then remove
-            picture.getPhotoPost().delete();
-            picture.setIsRemoved(true);
-            picture.setIsReblogged(false);
-            // todo also remove all post from my blog view, and from other views if I was the author
+            if (picture.isLiked()) {
+                picture.getPhotoPost().unlike();
+                picture.setIsLiked(false);
+            } else {
+                picture.getPhotoPost().like();
+                picture.setIsLiked(true);
+            }
+            // todo also add/remove all post from my blog view likes, update in other blogs
         } catch (Throwable e) {
-            Log.e("", "Picture removing failed", e);
+            Log.e("", "Picture liking failed", e);
             cancel(true);
         }
         return "";
@@ -38,11 +42,11 @@ public class PictureRemoveTask extends AsyncTask<Void, String, String> {
 
     protected void onCancelled() {
         Snackbar snackbar = Snackbar.make(MainActivity.get().findViewById(R.id.dynamic_view_pager),
-                "Error when removing. Is this picture in my blog?",
-                Snackbar.LENGTH_LONG).setAction("My blog", new View.OnClickListener() {
+                "Error when liking",
+                Snackbar.LENGTH_LONG).setAction("Retry", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.get().loadPictureAlbumInNewPage("", false);
+                new PictureLikeTask(recyclerAdapter, picture).execute();
             }
         }).setActionTextColor(MainActivity.get().getResources().
                 getColor(R.color.accent_material_dark));

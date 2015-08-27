@@ -14,7 +14,6 @@ import java.util.List;
  */
 public class Picture implements Serializable {
 
-    private String url;
     private long timestamp;
     private String postUrl;
     private String originalBlogUrl;
@@ -24,8 +23,6 @@ public class Picture implements Serializable {
     private boolean isRemoved = false;
     private PhotoPost photoPost;
     private List<PhotoSize> photoSizes = new ArrayList<>();
-    private int width;
-    private int height; // todo multiple sizes
     private int postNumber;
 
     public boolean isLiked() {
@@ -69,27 +66,13 @@ public class Picture implements Serializable {
     }
 
     public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
+        // back compatibility for picture history
+        if (!getPhotoSizes().isEmpty()) {
+            PhotoSize sizeToGetUrl = getPhotoSizes().get(Math.max(0, getPhotoSizes().size() - 5));
+            return sizeToGetUrl.getUrl();
+        } else {
+            return "";
+        }
     }
 
     public long getTimestamp() {

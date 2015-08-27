@@ -23,7 +23,7 @@ import android.widget.PopupWindow;
 import com.oleksiykovtun.picsontumblr.android.R;
 import com.oleksiykovtun.picsontumblr.android.adapter.AlbumCollectionAdapter;
 import com.oleksiykovtun.picsontumblr.android.adapter.PictureAlbumAdapter;
-import com.oleksiykovtun.picsontumblr.android.adapter.PictureHistoryManager;
+import com.oleksiykovtun.picsontumblr.android.adapter.manager.PictureHistoryManager;
 import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
 import com.oleksiykovtun.picsontumblr.android.model.AlbumCollection;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;

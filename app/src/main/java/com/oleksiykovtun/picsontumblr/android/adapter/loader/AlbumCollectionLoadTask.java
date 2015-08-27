@@ -1,10 +1,11 @@
-package com.oleksiykovtun.picsontumblr.android.adapter;
+package com.oleksiykovtun.picsontumblr.android.adapter.loader;
 
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 
+import com.oleksiykovtun.picsontumblr.android.adapter.AlbumCollectionAdapter;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 import com.oleksiykovtun.picsontumblr.android.R;

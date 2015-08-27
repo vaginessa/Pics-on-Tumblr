@@ -3,7 +3,6 @@ package com.oleksiykovtun.picsontumblr.android.adapter;
 import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.oleksiykovtun.picsontumblr.android.App;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureAlbumLoadTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureLikeTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureReblogTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureRemoveTask;
+import com.oleksiykovtun.picsontumblr.android.adapter.manager.PictureLoadManager;
+import com.oleksiykovtun.picsontumblr.android.adapter.manager.PictureSizeManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.R;
@@ -35,6 +40,8 @@ import pl.droidsonroids.gif.GifImageView;
 public class PictureAlbumAdapter extends LoadableRecyclerAdapter
         implements PictureAlbumLoadTask.PictureAlbumLoadListener {
 
+    private static final int CACHING_DISTANCE_IN_COLUMN = 10;
+    private static final int COLUMN_COUNT_DEFAULT = 2;
     private LoadableRecyclerView pictureAlbumRecyclerView;
     private PictureAlbum pictureAlbum;
 
@@ -57,6 +64,8 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
         this.pictureAlbum = pictureAlbum;
         this.pictureAlbumRecyclerView = pictureAlbumRecyclerView;
         this.pictureAlbumRecyclerView.setLoadableRecyclerAdapter(this);
+        this.pictureAlbumRecyclerView.setItemAnimator(null);
+        this.pictureAlbumRecyclerView.setColumnCount(COLUMN_COUNT_DEFAULT);
         this.pictureAlbumRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -64,11 +73,25 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
+        prefetchImagesAfterPosition(0, 10 * pictureAlbumRecyclerView.getColumnCount());
+    }
+
+    private void prefetchImagesAfterPosition(int currentPosition, int halfRangePositionsCount) {
+        int rangeStartInclusive = currentPosition + 1;
+        int rangeEndExclusive = currentPosition + halfRangePositionsCount;
+        if (rangeEndExclusive > dataSet.size()) {
+            rangeEndExclusive = dataSet.size();
+        }
+        for (int i = rangeStartInclusive; i < rangeEndExclusive; ++i) {
+            Picture picture = (Picture) dataSet.get(i);
+            String pictureUrl =
+                    PictureSizeManager.getImageUrlForWidth(picture, getDesiredPictureWidth());
+            Picasso.with(App.getContext()).load(pictureUrl).fetch();
+        }
     }
 
     private void putLastPictureToHistory() {
-        int position = ((LinearLayoutManager) (pictureAlbumRecyclerView.getLayoutManager())).
-                findFirstVisibleItemPosition();
+        int position = pictureAlbumRecyclerView.getFirstCompletelyVisibleItemPosition();
         if (position >= 0 && position < dataSet.size()) {
             Picture lastCompletelyVisiblePicture = (Picture) dataSet.get(position);
             PictureHistory.markShown(lastCompletelyVisiblePicture);
@@ -119,7 +142,7 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
                 final LoadableRecyclerView pictureRecyclerView =
                         (LoadableRecyclerView) pictureView.findViewById(R.id.picture_holder);
 
-                new PictureAdapter(picture, pictureRecyclerView);
+                new PictureAdapter(picture, pictureRecyclerView, viewHolder.imageView.getDrawable());
                 PagerManager.getPager().pushToPage(pictureView,
                         PagerManager.getPager().getCurrentPageNumber());
                 SwipeGestureProvider.swipeUp(0);
@@ -226,7 +249,8 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
                             @Override
                             public void onClick(View v) {
                                 pictureMenuDialog.dismiss();
-                                new PictureAdapter(picture, pictureRecyclerView);
+                                new PictureAdapter(picture, pictureRecyclerView,
+                                        viewHolder.imageView.getDrawable());
                                 PagerManager.getPager().pushToPage(pictureView,
                                         PagerManager.getPager().getCurrentPageNumber());
                             }
@@ -236,7 +260,8 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
                             @Override
                             public void onClick(View v) {
                                 pictureMenuDialog.dismiss();
-                                new PictureAdapter(picture, pictureRecyclerView);
+                                new PictureAdapter(picture, pictureRecyclerView,
+                                        viewHolder.imageView.getDrawable());
                                 int newPagePosition =
                                         PagerManager.getPager().getCurrentPageNumber() + 1;
                                 PagerManager.getPager().addPage(pictureView, newPagePosition);
@@ -250,7 +275,8 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
                                     @Override
                                     public void onClick(View v) {
                                         pictureMenuDialog.dismiss();
-                                        new PictureAdapter(picture, pictureRecyclerView);
+                                        new PictureAdapter(picture, pictureRecyclerView,
+                                                viewHolder.imageView.getDrawable());
                                         int newPagePosition = PagerManager.getPager().getPageCount();
                                         PagerManager.getPager().addPage(pictureView, newPagePosition);
                                     }
@@ -262,7 +288,13 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
     }
 
     @Override
-    public void onBindViewHolder(LoadableRecyclerAdapter.ViewHolder holder, int position) {
+    public void onViewRecycled (final LoadableRecyclerAdapter.ViewHolder holder) {
+        ((ViewHolder) holder).imageView.destroyDrawingCache();
+        super.onViewRecycled(holder);
+    }
+
+    @Override
+    public void onBindViewHolder(final LoadableRecyclerAdapter.ViewHolder holder, final int position) {
         final Picture picture = (Picture) (dataSet.get(position));
         String label = new SimpleDateFormat("yyyy-MM-dd HH:mm")
                 .format(picture.getTimestamp());
@@ -283,11 +315,27 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter
         }
         ((ViewHolder) holder).timestampTextView.setText(label);
         ((ViewHolder) holder).postNumberTextView.setText("" + picture.getPostNumber());
-        ((ViewHolder) holder).imageView.getLayoutParams().height = picture.getHeight();
-        ((ViewHolder) holder).imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        Picasso.with(App.getContext()).load(picture.getUrl())
-                .into(((ViewHolder) holder).imageView);
-        ((ViewHolder) holder).imageView.setTag(position);
+
+        loadPictureIntoPosition(((ViewHolder) holder).imageView, position);
+    }
+
+    private void loadPictureIntoPosition(ImageView imageView, int position) {
+        Picture picture = (Picture) (dataSet.get(position));
+        imageView.getLayoutParams().height =
+                PictureSizeManager.getPlaceholderHeightForWidth(picture, getDesiredPictureWidth());
+
+        PictureLoadManager.loadFromUrl(getPreviewPictureUrl(picture), imageView);
+
+        imageView.setTag(position);
+        prefetchImagesAfterPosition(position, 10 * pictureAlbumRecyclerView.getColumnCount());
+    }
+
+    private int getDesiredPictureWidth() {
+        return (int) (0.92 * pictureAlbumRecyclerView.getColumnWidth());
+    }
+
+    private String getPreviewPictureUrl(Picture picture) {
+        return PictureSizeManager.getImageUrlForWidth(picture, getDesiredPictureWidth());
     }
 
 }
