@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity"
     >
 
-    <item android:id="@+id/action_reblog_stats"
+    <item android:id="@+id/action_go_to_blog"
         android:icon="@mipmap/ic_launch_white_24dp"
         android:title="@string/action_custom_blog"
         android:orderInCategory="10"
@@ -41,8 +41,8 @@
         app:showAsAction="never"
         />
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+    <item android:id="@+id/action_go_to_post"
+        android:title="@string/action_go_to_post"
         android:orderInCategory="90"
         app:showAsAction="never"
         />

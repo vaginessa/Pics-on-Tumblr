@@ -1,10 +1,7 @@
 package com.oleksiykovtun.picsontumblr.android.view;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -13,20 +10,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.PopupWindow;
 
 import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.adapter.AlbumCollectionAdapter;
-import com.oleksiykovtun.picsontumblr.android.adapter.PictureAlbumAdapter;
-import com.oleksiykovtun.picsontumblr.android.adapter.manager.PictureHistoryManager;
-import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
-import com.oleksiykovtun.picsontumblr.android.model.AlbumCollection;
-import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
+import com.oleksiykovtun.picsontumblr.android.presenter.AlbumCollectionAdapter;
+import com.oleksiykovtun.picsontumblr.android.presenter.PictureAlbumAdapter;
+import com.oleksiykovtun.picsontumblr.android.manager.PictureHistoryManager;
+import com.oleksiykovtun.picsontumblr.android.manager.AccountManager;
+import com.oleksiykovtun.picsontumblr.android.presenter.SessionPresenter;
 import com.pnikosis.materialishprogress.ProgressWheel;
 
 import java.net.URL;
@@ -38,30 +30,28 @@ public class MainActivity extends AppCompatActivity {
 
     private static MainActivity thisActivity = null;
     private Toolbar toolbar = null;
-    private PopupWindow popupWindow = null;
     private ProgressWheel progressWheel;
     boolean aboutToExit = false;
+    private SessionPresenter sessionPresenter;
 
     public static MainActivity get() {
         return thisActivity;
     }
 
     public void goBack(boolean closeWholePage) {
-        if (popupWindow != null && popupWindow.isShowing()) {
-            hidePopupWindow();
-        } else if (isDrawerShowing()) {
+        if (isDrawerShowing()) {
             closeDrawer();
-        } else if (PagerManager.getPager().getPageCount() == 0) {
+        } else if (SessionPresenter.getInstance().getPageCount() == 0) {
             finish();
         } else if (closeWholePage) {
-            if (PagerManager.getPager().getPageCount() == 1) {
+            if (SessionPresenter.getInstance().getPageCount() == 1) {
                 finish();
             } else {
-                PagerManager.getPager().removePage(PagerManager.getPager().getCurrentPageNumber());
+                SessionPresenter.getInstance().closeCurrentPage();
             }
         } else {
-            if (PagerManager.getPager().getPageCount() == 1 &&
-                    PagerManager.getPager().getStackSizeAtPage(0) == 1) {
+            if (SessionPresenter.getInstance().getPageCount() == 1 &&
+                    SessionPresenter.getInstance().getContentItemStackSizeOnPage(0) == 1) {
                 if (aboutToExit) {
                     finish();
                 } else {
@@ -76,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     aboutToExit = true;
                 }
             } else {
-                PagerManager.getPager().popFromPage(PagerManager.getPager().getCurrentPageNumber());
+                SessionPresenter.getInstance().removeContentItemFromTopOfCurrentPage();
                 aboutToExit = false;
             }
         }
@@ -124,10 +114,6 @@ public class MainActivity extends AppCompatActivity {
         progressWheel.setProgress(0);
     }
 
-    public void setToolbarTitle(String titleText) {
-        toolbar.setTitle(titleText);
-    }
-
     public String getToolbarTitle() {
         return "" + ((toolbar != null) ? toolbar.getTitle() : "");
     }
@@ -160,9 +146,11 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.app_name);
 
         progressWheel = (ProgressWheel) findViewById(R.id.progress_wheel);
-        progressWheel.spin();
+        showProgressWheel();
 
-        PagerManager.setPager((ActionDynamicViewPager) findViewById(R.id.dynamic_view_pager));
+        sessionPresenter =
+                new SessionPresenter((ActionDynamicViewPager) findViewById(R.id.dynamic_view_pager),
+                        toolbar);
 
         if (! AccountManager.isClientAuthorized()) {
             AccountManager.startAuthorization();
@@ -191,17 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadPictureAlbumInNewPage(String url, boolean likesMode) {
-        LayoutInflater inflater =
-                (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View albumView = inflater.inflate(R.layout.linear_layout_picture_blog, null);
-        final LoadableRecyclerView albumRecyclerView =
-                (LoadableRecyclerView) albumView.findViewById(R.id.picture_holder);
-        new PictureAlbumAdapter(new PictureAlbum(url).likesMode(likesMode), albumRecyclerView).
-                loadMore();
-        int currentPageNumber = (PagerManager.getPager().getPageCount() == 0) ? 0 :
-                PagerManager.getPager().getCurrentPageNumber();
-        PagerManager.getPager().addPage(albumView, currentPageNumber + 1);
-        PagerManager.getPager().goToPage(currentPageNumber + 1);
+        sessionPresenter.addPagePresenter(new PictureAlbumAdapter(url, likesMode, false, false));
     }
 
     private void setDrawerListeners() {
@@ -212,17 +190,10 @@ public class MainActivity extends AppCompatActivity {
                 closeDrawer();
             }
         });
-        findViewById(R.id.button_settings).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // todo implement
-                closeDrawer();
-            }
-        });
         findViewById(R.id.button_logout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PagerManager.getPager().removeAll();
+                SessionPresenter.getInstance().closeAllPages();
                 AccountManager.revokeAuthorization();
                 AccountManager.startAuthorization();
                 closeDrawer();
@@ -231,14 +202,14 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button_followers).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAlbumCollectionPopupWindow("Followers");
+                showAlbumCollection("Followers");
                 closeDrawer();
             }
         });
         findViewById(R.id.button_following).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAlbumCollectionPopupWindow("Following");
+                showAlbumCollection("Following");
                 closeDrawer();
             }
         });
@@ -265,60 +236,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void showAlbumCollectionPopupWindow(String name) {
-        LayoutInflater inflater =
-                (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View albumCollectionView = inflater.inflate(R.layout.linear_layout_popup_window, null);
-
-        LoadableRecyclerView loadableRecyclerView =
-                (LoadableRecyclerView) albumCollectionView.findViewById(R.id.album_collection_holder);
-        final AlbumCollectionAdapter albumCollectionAdapter =
-                new AlbumCollectionAdapter(new AlbumCollection(name), loadableRecyclerView);
-        albumCollectionAdapter.loadMore();
-
-        Toolbar toolbar = (Toolbar) albumCollectionView.findViewById(R.id.toolbar_popup);
-        toolbar.setTitle(name);
-        toolbar.inflateMenu(R.menu.menu_collection);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) { // now only one item
-                switch (item.getItemId()) {
-                    case R.id.action_reblog_stats:
-                        albumCollectionAdapter.resetStats(false);
-                        albumCollectionAdapter.loadStatistics();
-                        break;
-                    case R.id.action_likes_stats:
-                        albumCollectionAdapter.resetStats(true);
-                        albumCollectionAdapter.loadStatistics();
-                        break;
-                }
-                return false;
-            }
-        });
-
-        // resetting
-        if (popupWindow != null) {
-            popupWindow.dismiss();
-        }
-        // showing new window
-        popupWindow = new PopupWindow(albumCollectionView,
-                findViewById(R.id.dynamic_view_pager).getWidth(),
-                findViewById(R.id.dynamic_view_pager).getHeight(), true);
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.showAtLocation(findViewById(R.id.dynamic_view_pager), Gravity.CENTER, 0, 0);
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                AlbumCollectionAdapter.stopBatchLoading(); // heavy loading tasks should not continue
-            }
-        });
-    }
-
-    public void hidePopupWindow() {
-        if (popupWindow != null) {
-            popupWindow.dismiss();
-        }
+    public void showAlbumCollection(String name) {
+        SessionPresenter.getInstance().addPagePresenter(new AlbumCollectionAdapter(name),
+                SessionPresenter.Position.ON_TOP);
         closeDrawer();
     }
 
@@ -339,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-        if (PagerManager.getPager().getPageCount() == 0) {
+        if (SessionPresenter.getInstance().getPageCount() == 0) {
             goBack(true);
         }
     }
@@ -347,14 +267,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         goBack(false);
-    }
-
-    public void writePreferences(String label, String message) {
-        getSharedPreferences("", Context.MODE_PRIVATE).edit().putString(label, message).commit();
-    }
-
-    public String readPreferences(String label, String defaultValue) {
-        return getSharedPreferences("", Context.MODE_PRIVATE).getString(label, defaultValue);
     }
 
     @Override
@@ -365,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        sessionPresenter.finishSession();
         PictureHistoryManager.saveHistory(this);
         super.onDestroy();
     }

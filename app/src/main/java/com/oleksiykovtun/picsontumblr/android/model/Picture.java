@@ -1,10 +1,5 @@
 package com.oleksiykovtun.picsontumblr.android.model;
 
-import android.util.Log;
-
-import com.tumblr.jumblr.types.PhotoPost;
-import com.tumblr.jumblr.types.PhotoSize;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,18 +7,20 @@ import java.util.List;
 /**
  * Picture in a blog
  */
-public class Picture implements Serializable {
+public class Picture extends ContentItem implements Serializable {
 
     private long timestamp;
     private String postUrl;
     private String originalBlogUrl;
     private String currentBlogUrl;
+    private String rebloggedFromName;
     private boolean isLiked = false;
     private boolean isReblogged = false;
     private boolean isRemoved = false;
-    private PhotoPost photoPost;
-    private List<PhotoSize> photoSizes = new ArrayList<>();
+    private List<SizedPicture> sizedPictures = new ArrayList<>();
     private int postNumber;
+    private long postId;
+    private String reblogKey;
 
     public boolean isLiked() {
         return isLiked;
@@ -33,28 +30,20 @@ public class Picture implements Serializable {
         this.isLiked = isLiked;
     }
 
-    public void reblog(String blogName) {
-        try {
-            photoPost.reblog(blogName);
-        } catch (Throwable e) {
-            Log.e("Instantr", "Reblogging failed", e);
-        }
+    public List<SizedPicture> getSizedPictures() {
+        return sizedPictures;
     }
 
-    public List<PhotoSize> getPhotoSizes() {
-        return photoSizes;
+    public void setSizedPictures(List<SizedPicture> sizedPictures) {
+        this.sizedPictures = sizedPictures;
     }
 
-    public void setPhotoSizes(List<PhotoSize> photoSizes) {
-        this.photoSizes = photoSizes;
+    public String getRebloggedFromName() {
+        return rebloggedFromName;
     }
 
-    public PhotoPost getPhotoPost() {
-        return photoPost;
-    }
-
-    public void setPhotoPost(PhotoPost photoPost) {
-        this.photoPost = photoPost;
+    public void setRebloggedFromName(String rebloggedFromName) {
+        this.rebloggedFromName = rebloggedFromName;
     }
 
     public int getPostNumber() {
@@ -65,10 +54,12 @@ public class Picture implements Serializable {
         this.postNumber = postNumber;
     }
 
+    @Override
     public String getUrl() {
         // back compatibility for picture history
-        if (!getPhotoSizes().isEmpty()) {
-            PhotoSize sizeToGetUrl = getPhotoSizes().get(Math.max(0, getPhotoSizes().size() - 5));
+        if (!getSizedPictures().isEmpty()) {
+            SizedPicture sizeToGetUrl =
+                    getSizedPictures().get(Math.max(0, getSizedPictures().size() - 5));
             return sizeToGetUrl.getUrl();
         } else {
             return "";
@@ -121,5 +112,21 @@ public class Picture implements Serializable {
 
     public void setIsRemoved(boolean isRemoved) {
         this.isRemoved = isRemoved;
+    }
+
+    public long getPostId() {
+        return postId;
+    }
+
+    public void setPostId(long postId) {
+        this.postId = postId;
+    }
+
+    public String getReblogKey() {
+        return reblogKey;
+    }
+
+    public void setReblogKey(String reblogKey) {
+        this.reblogKey = reblogKey;
     }
 }

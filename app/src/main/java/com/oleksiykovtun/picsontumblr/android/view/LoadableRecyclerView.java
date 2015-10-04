@@ -5,12 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 
-import com.oleksiykovtun.picsontumblr.android.adapter.LoadableRecyclerAdapter;
-
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.Arrays;
-import java.util.Collections;
+import com.oleksiykovtun.picsontumblr.android.presenter.LoadableRecyclerAdapter;
 
 /**
  * The "load more"-supporting RecyclerView
@@ -68,7 +63,13 @@ public class LoadableRecyclerView extends RecyclerView {
     public int getFirstCompletelyVisibleItemPosition() {
         int[] firstCompletelyVisibleItemPositions = ((StaggeredGridLayoutManager)
                 (getLayoutManager())).findFirstCompletelyVisibleItemPositions(null);
-        return Collections.min(Arrays.asList(ArrayUtils.toObject(firstCompletelyVisibleItemPositions)));
+        int minFirstCompletelyVisibleItemPosition = Integer.MAX_VALUE;
+        for (int firstCompletelyVisibleItemPosition : firstCompletelyVisibleItemPositions) {
+            if (firstCompletelyVisibleItemPosition < minFirstCompletelyVisibleItemPosition) {
+                minFirstCompletelyVisibleItemPosition = firstCompletelyVisibleItemPosition;
+            }
+        }
+        return minFirstCompletelyVisibleItemPosition;
     }
 
     @Override

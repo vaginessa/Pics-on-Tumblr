@@ -14,9 +14,9 @@ import android.widget.EditText;
 
 import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.adapter.PictureAlbumAdapter;
-import com.oleksiykovtun.picsontumblr.android.adapter.loader.PictureAlbumFollowTask;
-import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
+import com.oleksiykovtun.picsontumblr.android.presenter.PictureAlbumAdapter;
+import com.oleksiykovtun.picsontumblr.android.loader.PictureAlbumFollowTask;
+import com.oleksiykovtun.picsontumblr.android.presenter.SessionPresenter;
 
 /**
  * OnMenuItemClickListener for the app's main Toolbar
@@ -26,15 +26,39 @@ public class ToolbarMenuItemClickListener implements Toolbar.OnMenuItemClickList
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_go_to_post) {
+            LayoutInflater inflater = (LayoutInflater) App.getContext()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View goToPostMenuLayout =
+                    inflater.inflate(R.layout.linear_layout_menu_go_to_post, null);
+
+            AlertDialog dialog = new AlertDialog.Builder(
+                    new ContextThemeWrapper(MainActivity.get(), R.style.myDialog))
+                    .setTitle("Enter post number:")
+                    .setView(goToPostMenuLayout)
+                    .setPositiveButton("Go", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            dialog.dismiss();
+                            openGoToPost(goToPostMenuLayout);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            dialog.cancel();
+                        }
+                    })
+                    .create();
+            dialog.getWindow()
+                    .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            dialog.show();
             return true;
-        } else if (id == R.id.action_reblog_stats) {
+        } else if (id == R.id.action_go_to_blog) {
             LayoutInflater inflater = (LayoutInflater) App.getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             final View openBlogMenuLayout =
                     inflater.inflate(R.layout.linear_layout_menu_open_blog, null);
 
-            AlertDialog commentEditDialog = new AlertDialog.Builder(
+            AlertDialog dialog = new AlertDialog.Builder(
                     new ContextThemeWrapper(MainActivity.get(), R.style.myDialog))
                     .setTitle("Enter blog address:")
                     .setView(openBlogMenuLayout)
@@ -56,24 +80,18 @@ public class ToolbarMenuItemClickListener implements Toolbar.OnMenuItemClickList
                         }
                     })
                     .create();
-            commentEditDialog.getWindow()
+            dialog.getWindow()
                     .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-            commentEditDialog.show();
+            dialog.show();
             return true;
         } else if (id == R.id.action_follow) {
             new PictureAlbumFollowTask(true, MainActivity.get().getToolbarTitle()).execute();
         } else if (id == R.id.action_unfollow) {
             new PictureAlbumFollowTask(false, MainActivity.get().getToolbarTitle()).execute();
         } else if (id == R.id.action_more_columns) {
-            View albumView = PagerManager.getPager().getCurrentView();
-            LoadableRecyclerView recyclerView =
-                    (LoadableRecyclerView) albumView.findViewById(R.id.picture_holder);
-            recyclerView.setColumnCount(recyclerView.getColumnCount() + 1);
+            SessionPresenter.getInstance().increaseColumnCountOnPage();
         } else if (id == R.id.action_less_columns) {
-            View albumView = PagerManager.getPager().getCurrentView();
-            LoadableRecyclerView recyclerView =
-                    (LoadableRecyclerView) albumView.findViewById(R.id.picture_holder);
-            recyclerView.setColumnCount(recyclerView.getColumnCount() - 1);
+            SessionPresenter.getInstance().decreaseColumnCountOnPage();
         } else if (id == R.id.action_search) {
             LayoutInflater inflater = (LayoutInflater) App.getContext()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -110,24 +128,11 @@ public class ToolbarMenuItemClickListener implements Toolbar.OnMenuItemClickList
         String searchTags = "" + ((EditText) searchMenuLayout.findViewById(
                 R.id.edit_text_search)).getText();
         boolean inNewPage = ((CheckBox) searchMenuLayout.findViewById(
-                R.id.checkbox_new_page)).isChecked() || PagerManager.getPager().getPageCount() == 0;
+                R.id.checkbox_new_page)).isChecked() || SessionPresenter.getInstance().getPageCount() == 0;
 
-        LayoutInflater inflater =
-                (LayoutInflater) App.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View albumView = inflater.inflate(R.layout.linear_layout_picture_blog, null);
-        final LoadableRecyclerView albumRecyclerView =
-                (LoadableRecyclerView) albumView.findViewById(R.id.picture_holder);
-        new PictureAlbumAdapter(new PictureAlbum(searchTags).searchMode(true), albumRecyclerView).
-                loadMore();
-
-        if (inNewPage) {
-            int newPagePosition = PagerManager.getPager().getCurrentPageNumber() + 1;
-            PagerManager.getPager().addPage(albumView, newPagePosition);
-            PagerManager.getPager().goToPage(newPagePosition);
-        } else {
-            PagerManager.getPager().pushToPage(albumView,
-                    PagerManager.getPager().getCurrentPageNumber());
-        }
+        SessionPresenter.getInstance().addPagePresenter(
+                new PictureAlbumAdapter(searchTags, false, false, true),
+                inNewPage ? SessionPresenter.Position.NEW_PAGE_NEXT : SessionPresenter.Position.ON_TOP);
     }
 
     private void openNewBlog(View openBlogMenuLayout, boolean likesMode) {
@@ -136,25 +141,26 @@ public class ToolbarMenuItemClickListener implements Toolbar.OnMenuItemClickList
         boolean randomMode = ((CheckBox) openBlogMenuLayout.findViewById(
                 R.id.checkbox_randomly)).isChecked();
         boolean inNewPage = ((CheckBox) openBlogMenuLayout.findViewById(
-                R.id.checkbox_new_page)).isChecked() || PagerManager.getPager().getPageCount() == 0;
+                R.id.checkbox_new_page)).isChecked() || SessionPresenter.getInstance().getPageCount() == 0;
 
-        LayoutInflater inflater =
-                (LayoutInflater) App.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View albumView = inflater.inflate(R.layout.linear_layout_picture_blog, null);
-        final LoadableRecyclerView albumRecyclerView =
-                (LoadableRecyclerView) albumView.findViewById(R.id.picture_holder);
-        new PictureAlbumAdapter(new PictureAlbum(blogUrl).
-                likesMode(likesMode).randomMode(randomMode), albumRecyclerView).loadMore();
-
-        if (inNewPage) {
-            int newPagePosition = PagerManager.getPager().getCurrentPageNumber() + 1;
-            PagerManager.getPager().addPage(albumView, newPagePosition);
-            PagerManager.getPager().goToPage(newPagePosition);
-        } else {
-            PagerManager.getPager().pushToPage(albumView,
-                    PagerManager.getPager().getCurrentPageNumber());
-        }
+        SessionPresenter.getInstance().addPagePresenter(
+                new PictureAlbumAdapter(blogUrl, likesMode, randomMode, false),
+                inNewPage ? SessionPresenter.Position.NEW_PAGE_NEXT : SessionPresenter.Position.ON_TOP);
     }
 
+    private void openGoToPost(View goToPostMenuLayout) {
+        String blogUrl = "" + SessionPresenter.getInstance().getCurrentPageTitle();
+        int targetPostNumber = 0;
+        try {
+            targetPostNumber = Integer.parseInt(((EditText) goToPostMenuLayout.findViewById(
+                    R.id.edit_text_post_number)).getText().toString()) - 1;
+        } catch (Throwable e) {
+            // TODO process error
+        }
+
+        SessionPresenter.getInstance().addPagePresenter(
+                new PictureAlbumAdapter(blogUrl, targetPostNumber),
+                SessionPresenter.Position.ON_TOP);
+    }
 
 }

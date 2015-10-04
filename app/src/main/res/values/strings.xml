@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Pics on Tumblr</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_go_to_post">Go to post</string>
     <string name="action_follow">Follow</string>
     <string name="action_unfollow">Unfollow</string>
     <string name="action_more_columns">More columns</string>

@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Blog collection. Can be a set of following blogs, followed blogs, etc.
  */
-public class AlbumCollection {
+public class AlbumCollection extends ContentItem {
 
     private static final String FOLLOWING = "following";
     private static final String FOLLOWERS = "followers";
@@ -18,6 +18,7 @@ public class AlbumCollection {
 
     public AlbumCollection(String name) {
         this.name = name;
+        setUrl(name); // todo improve
         if (name != null) {
             if (name.toLowerCase().equals(FOLLOWING)) {
                 isFollowing = true;

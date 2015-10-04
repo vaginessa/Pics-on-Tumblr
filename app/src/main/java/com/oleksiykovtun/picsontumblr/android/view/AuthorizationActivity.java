@@ -11,7 +11,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.model.AccountManager;
+import com.oleksiykovtun.picsontumblr.android.manager.AccountManager;
 import com.pnikosis.materialishprogress.ProgressWheel;
 
 /**

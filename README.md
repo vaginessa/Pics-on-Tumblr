@@ -12,7 +12,7 @@ Get (clone or download ZIP) this repo and navigate to its root folder.
     cd Pics-on-Tumblr
 
 Provide the valid OAuth Consumer Key `API_KEY` and Secret Key `API_SECRET` values
-in `com.oleksiykovtun.picsontumblr.android.model.AccountManager`.
+in `com.oleksiykovtun.picsontumblr.android.manager.AccountManager`.
 
 Connect your Android device to ADB and run the command:
 

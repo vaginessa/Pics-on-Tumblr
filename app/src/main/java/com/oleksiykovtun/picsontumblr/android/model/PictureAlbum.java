@@ -1,7 +1,8 @@
 package com.oleksiykovtun.picsontumblr.android.model;
 
-import com.oleksiykovtun.picsontumblr.android.adapter.manager.AlbumHistoryManager;
+import com.oleksiykovtun.picsontumblr.android.manager.AlbumHistoryManager;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -9,12 +10,12 @@ import java.util.Random;
 /**
  * A list of pictures. Can be a blog or a search result with pictures
  */
-public class PictureAlbum {
+public class PictureAlbum extends ContentItem implements Serializable {
 
-    private static final String DASHBOARD = "dashboard";
+    public static final String DASHBOARD = "dashboard";
     private static final int DASHBOARD_LIMIT = 250;
     private static final int LIKES_LIMIT = 1000;
-    private static final int ABSOLUTE_LIMIT = 10000;
+    private static final int ABSOLUTE_LIMIT = 1000000;
 
     private String url;
     private List<Picture> pictureList = new ArrayList<>();
@@ -52,6 +53,12 @@ public class PictureAlbum {
     @Override
     public int hashCode() {
         return (getUrl() != null) ? getUrl().hashCode() : 0;
+    }
+
+    public PictureAlbum startingFromPost(int postsOffset) {
+        this.currentMaxPosts = postsOffset;
+        this.currentPhotoPostCount = postsOffset;
+        return this;
     }
 
     public PictureAlbum likesMode(boolean showLikesInsteadOfPosts) {

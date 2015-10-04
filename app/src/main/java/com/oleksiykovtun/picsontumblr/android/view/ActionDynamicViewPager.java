@@ -6,8 +6,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.oleksiykovtun.android.dynamicviewpager.DynamicViewPager;
-import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.adapter.manager.AlbumHistoryManager;
+import com.oleksiykovtun.picsontumblr.android.presenter.SessionPresenter;
 
 /**
  * DynamicViewPager with action event processing support
@@ -45,17 +44,18 @@ public class ActionDynamicViewPager extends DynamicViewPager {
     }
 
     @Override
-    public void onAction() {
+    public void onPagesChanged() {
         scrollable = true;
-        if (PagerManager.getPager().getPageCount() > 0 &&
-                PagerManager.getPager().getCurrentView().getTag() != null) {
-            String currentAlbumName = "" + PagerManager.getPager().getCurrentView().getTag();
-            MainActivity.get().setToolbarTitle(currentAlbumName);
-            AlbumHistoryManager.markVisited(currentAlbumName);
+        if (getTabCount() > 0) {
+            SessionPresenter.getInstance().onPagesChanged();
         }
-        if (PagerManager.getPager().getPageCount() == 0) {
-            MainActivity.get().setToolbarTitle(MainActivity.get().getResources().
-                    getString(R.string.app_name));
+    }
+
+    @Override
+    public void onPagesScrolled() {
+        scrollable = true;
+        if (getTabCount() > 0) {
+            SessionPresenter.getInstance().onPagesScrolled();
         }
     }
 

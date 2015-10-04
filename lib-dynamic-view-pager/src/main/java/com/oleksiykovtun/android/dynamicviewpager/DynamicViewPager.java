@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 
 /**
@@ -33,19 +32,19 @@ public class DynamicViewPager extends ViewPager {
     public void addPage(View view) {
         dynamicPagerAdapter.addView(view);
         dynamicPagerAdapter.notifyDataSetChanged();
-        onAction();
+        onPagesChanged();
     }
 
     public void addPage(View view, int position) {
         dynamicPagerAdapter.addView(view, position);
         dynamicPagerAdapter.notifyDataSetChanged();
-        onAction();
+        onPagesChanged();
     }
 
     public void pushToPage(View view, int position) {
         dynamicPagerAdapter.pushView(view, position);
         dynamicPagerAdapter.notifyDataSetChanged();
-        onAction();
+        onPagesChanged();
     }
 
     public void popFromPage(int position) {
@@ -55,7 +54,7 @@ public class DynamicViewPager extends ViewPager {
             dynamicPagerAdapter.popView(position);
         }
         dynamicPagerAdapter.notifyDataSetChanged();
-        onAction();
+        onPagesChanged();
     }
 
     public int getStackSizeAtPage(int position) {
@@ -63,11 +62,11 @@ public class DynamicViewPager extends ViewPager {
     }
 
     public void removePage(int position) {
-        int newShowingPageNumber = (getCurrentPageNumber() < getPageCount() - 1) ?
+        int newShowingPageNumber = (getCurrentPageNumber() < getTabCount() - 1) ?
                 (getCurrentPageNumber() + 1) : (getCurrentPageNumber() - 1);
         goToPage(newShowingPageNumber);
 
-        if (getPageCount() == 1) {
+        if (getTabCount() == 1) {
             removePageNow(position);
         } else {
             pageScheduledToRemovalAfterAnimation = position;
@@ -75,13 +74,13 @@ public class DynamicViewPager extends ViewPager {
     }
 
     public void removeAll() {
-        while (getPageCount() > 0) {
+        while (getTabCount() > 0) {
             dynamicPagerAdapter.removeView(this, 0);
         }
-        onAction();
+        onPagesChanged();
     }
 
-    public int getPageCount() {
+    public int getTabCount() {
         return dynamicPagerAdapter.getCount();
     }
 
@@ -97,18 +96,18 @@ public class DynamicViewPager extends ViewPager {
         if (position < 0) {
             position = 0;
         }
-        if (position >= getPageCount()) {
-            position = getPageCount() - 1;
+        if (position >= getTabCount()) {
+            position = getTabCount() - 1;
         }
-        if (getPageCount() > 0) {
+        if (getTabCount() > 0) {
             setCurrentItem(position);
         }
-        onAction();
+        onPagesScrolled();
     }
 
-    public void onAction() {
+    public void onPagesChanged() { }
 
-    }
+    public void onPagesScrolled() { }
 
     private void setup() {
         dynamicPagerAdapter = new DynamicPagerAdapter();
@@ -117,12 +116,11 @@ public class DynamicViewPager extends ViewPager {
             @Override
             public void onPageScrolled(int i, float v, int i1) {
                 isPageChanged = true;
-                onAction();
             }
 
             @Override
             public void onPageSelected(int i) {
-                onAction();
+                onPagesScrolled();
             }
 
             @Override
@@ -142,7 +140,7 @@ public class DynamicViewPager extends ViewPager {
                     case ViewPager.SCROLL_STATE_SETTLING:
                         break;
                 }
-                onAction();
+                onPagesScrolled();
             }
         });
     }
@@ -157,7 +155,7 @@ public class DynamicViewPager extends ViewPager {
         } else {
             goToPage(currentPageNumberBeforePageRemoval - 1);
         }
-        onAction();
+        onPagesChanged();
     }
 
 }
