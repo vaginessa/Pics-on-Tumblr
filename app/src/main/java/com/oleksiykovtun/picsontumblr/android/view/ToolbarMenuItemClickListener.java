@@ -15,7 +15,7 @@ import android.widget.EditText;
 import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
 import com.oleksiykovtun.picsontumblr.android.presenter.PictureAlbumAdapter;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureAlbumFollowTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureAlbumFollowTask;
 import com.oleksiykovtun.picsontumblr.android.presenter.SessionPresenter;
 
 /**

@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.loader.AlbumCollectionLoadTask;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureAlbumLoadTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.AlbumCollectionLoadTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureAlbumLoadTask;
 import com.oleksiykovtun.picsontumblr.android.model.AlbumCollection;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView;
@@ -95,8 +95,8 @@ public class AlbumCollectionAdapter extends LoadableRecyclerAdapter implements L
 
     public void loadStatistics() {
         // will load all "my" blog and count post origins in it
-        PictureAlbumLoadTask pictureAlbumLoadTask = new PictureAlbumLoadTask(myAlbumForStats);
-        pictureAlbumLoadTask.setOnPictureAlbumLoadListener(new PictureAlbumLoadTask.PictureAlbumLoadListener() {
+        PictureAlbumLoadTask pictureAlbumLoadTask = new PictureAlbumLoadTask(myAlbumForStats,
+                new PictureAlbumLoadTask.PictureAlbumLoadListener() {
             @Override
             public void onPictureAlbumPartLoaded(String albumName) {
                 // update statistics

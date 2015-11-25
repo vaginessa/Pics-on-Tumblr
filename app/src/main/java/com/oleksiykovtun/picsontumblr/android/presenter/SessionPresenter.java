@@ -60,9 +60,6 @@ public class SessionPresenter {
         if (pagePresenter == null) {
             return;
         }
-        if (pagePresenter instanceof LoadablePagePresenter) {
-            ((LoadablePagePresenter) pagePresenter).loadMore();
-        }
         // overriding page position for first page to add
         if (session.getTabCount() == 0) {
             position = Position.NEW_PAGE_LAST;
@@ -82,6 +79,9 @@ public class SessionPresenter {
             session.setViewingTabNumber(targetTabNumber);
         }
         pagePresenters.add(pagePresenter);
+        if (pagePresenter instanceof LoadablePagePresenter) {
+            ((LoadablePagePresenter) pagePresenter).loadMore();
+        }
         updateView();
     }
 
@@ -179,6 +179,15 @@ public class SessionPresenter {
                 return;
             }
         }
+    }
+
+    public boolean containsPresenterOfModel(ContentItem contentItemToFind) {
+        for (PagePresenter pagePresenter : pagePresenters) {
+            if (pagePresenter.getModel() == contentItemToFind) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ViewPager methods

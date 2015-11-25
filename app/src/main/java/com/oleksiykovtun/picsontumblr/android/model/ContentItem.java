@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Item of content of some kind
  */
-public class ContentItem implements Serializable {
+public abstract class ContentItem implements Serializable {
 
     private String url;
     private String title;

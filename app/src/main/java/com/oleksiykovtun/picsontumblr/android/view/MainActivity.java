@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             if (SessionPresenter.getInstance().getPageCount() == 1 &&
                     SessionPresenter.getInstance().getContentItemStackSizeOnPage(0) == 1) {
                 if (aboutToExit) {
+                    SessionPresenter.getInstance().closeAllPages();
                     finish();
                 } else {
                     Snackbar snackbar = Snackbar.make(MainActivity.get().

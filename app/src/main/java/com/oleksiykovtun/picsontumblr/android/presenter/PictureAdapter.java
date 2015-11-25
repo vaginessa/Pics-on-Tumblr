@@ -15,9 +15,9 @@ import android.widget.TextView;
 
 import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureLikeTask;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureReblogTask;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureRemoveTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureLikeTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureReblogTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureRemoveTask;
 import com.oleksiykovtun.picsontumblr.android.manager.PictureLoadManager;
 import com.oleksiykovtun.picsontumblr.android.manager.PictureSizeManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;

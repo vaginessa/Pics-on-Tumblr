@@ -13,10 +13,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.oleksiykovtun.picsontumblr.android.App;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureAlbumLoadTask;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureLikeTask;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureReblogTask;
-import com.oleksiykovtun.picsontumblr.android.loader.PictureRemoveTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureAlbumLoadTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureLikeTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureReblogTask;
+import com.oleksiykovtun.picsontumblr.android.tasks.PictureRemoveTask;
 import com.oleksiykovtun.picsontumblr.android.manager.PictureLoadManager;
 import com.oleksiykovtun.picsontumblr.android.manager.PictureSizeManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
@@ -54,8 +54,7 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter implements Load
 
     @Override
     public void loadMore() {
-        PictureAlbumLoadTask pictureAlbumLoadTask = new PictureAlbumLoadTask(pictureAlbum);
-        pictureAlbumLoadTask.setOnPictureAlbumLoadListener(this);
+        PictureAlbumLoadTask pictureAlbumLoadTask = new PictureAlbumLoadTask(pictureAlbum, this);
         pictureAlbumLoadTask.execute();
     }
 
