@@ -13,8 +13,8 @@ import java.util.Random;
 public class PictureAlbum extends ContentItem implements Serializable {
 
     public static final String DASHBOARD = "dashboard";
-    private static final int DASHBOARD_LIMIT = 250;
-    private static final int LIKES_LIMIT = 1000;
+    public static final int DASHBOARD_LIMIT = 250;
+    public static final int LIKES_LIMIT = 1000;
     private static final int ABSOLUTE_LIMIT = 1000000;
 
     private String url;

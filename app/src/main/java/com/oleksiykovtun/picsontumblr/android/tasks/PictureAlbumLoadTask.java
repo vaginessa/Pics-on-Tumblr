@@ -53,9 +53,9 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
         blog = AccountManager.getAccountClient().blogInfo(pictureAlbum.getUrl());
 
         int blogItemCount = pictureAlbum.getUrl().equalsIgnoreCase(PictureAlbum.DASHBOARD)
-                ? 250 // todo limit if needed
+                ? PictureAlbum.DASHBOARD_LIMIT // todo limit if needed
                 : pictureAlbum.isShowLikesInsteadOfPosts()
-                    ? blog.getLikeCount()
+                    ? Math.min(PictureAlbum.LIKES_LIMIT, blog.getLikeCount())
                     : blog.getPostCount();
         int offset = pictureAlbum.isSearch()
                 ? 0
@@ -63,7 +63,7 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
                     ? new Random().nextInt(blogItemCount)
                     : pictureAlbum.getCurrentMaxPosts();
         int limit = pictureAlbum.isSearch()
-                ? 20
+                ? pictureAlbum.getLoadPostsStep()
                 : pictureAlbum.isShowRandomly()
                     ? 2 // todo fix loading and make 1
                     : Math.max(0, Math.min(pictureAlbum.getLoadPostsStep(),
