@@ -50,40 +50,37 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
                     AccountManager.getAccountClient().user().getBlogs().get(0).getName();
             pictureAlbum.setUrl(myBlogName);
         }
-        Log.d("", "More of album: URL " + pictureAlbum.getUrl());
         blog = AccountManager.getAccountClient().blogInfo(pictureAlbum.getUrl());
+
+        int blogItemCount = pictureAlbum.getUrl().equalsIgnoreCase(PictureAlbum.DASHBOARD)
+                ? 250 // todo limit if needed
+                : pictureAlbum.isShowLikesInsteadOfPosts()
+                    ? blog.getLikeCount()
+                    : blog.getPostCount();
+        int offset = pictureAlbum.isSearch()
+                ? 0
+                : pictureAlbum.isShowRandomly()
+                    ? new Random().nextInt(blogItemCount)
+                    : pictureAlbum.getCurrentMaxPosts();
+        int limit = pictureAlbum.isSearch()
+                ? 20
+                : pictureAlbum.isShowRandomly()
+                    ? 2 // todo fix loading and make 1
+                    : Math.max(0, Math.min(pictureAlbum.getLoadPostsStep(),
+                            pictureAlbum.getPostsLimit() - pictureAlbum.getCurrentMaxPosts()));
+
+        Log.d("PictureAlbumLoadTask", "Picture album " + pictureAlbum.getUrl()
+                + ": size = " + blogItemCount + ", offset = " + offset + ", limit = " + limit);
+
         Map<String, Integer> options = new HashMap<>();
-        int limit;
-        if (pictureAlbum.isSearch()) {
-            limit = 20;
-        } else if (pictureAlbum.isShowRandomly()) {
-            limit = 2; // todo fix, should work when 1
-        } else {
-            int postsLimit = pictureAlbum.getPostsLimit();
-            int currentPostsCount = pictureAlbum.getCurrentMaxPosts();
-            int postsLoadLimit = pictureAlbum.getLoadPostsStep();
-            limit = Math.max(0, Math.min(postsLoadLimit, postsLimit - currentPostsCount));
-        }
         options.put("limit", limit);
-        int blogItemCount = 0;
-        if (!pictureAlbum.getUrl().equals("dashboard")) {
-            blogItemCount = pictureAlbum
-                    .isShowLikesInsteadOfPosts() ? blog.getLikeCount() : blog.getPostCount();
-            Log.d("", "Likes/posts: " + blogItemCount);
-        }
-        // offset is set when the album is not search results
-        if (! pictureAlbum.isSearch()) {
-            int offset = pictureAlbum.isShowRandomly() ?
-                    new Random().nextInt(pictureAlbum.getPostsLimit()) :
-                    pictureAlbum.getCurrentMaxPosts();
-            options.put("offset", offset);
-        }
         options.put("reblog_info", 1);
+        options.put("offset", offset);
+
         List<Post> posts;
         if (limit == 0) {
-            // no posts of the limit is 0
             posts = new ArrayList<>();
-        } else if (pictureAlbum.getUrl().equals("dashboard")) {
+        } else if (pictureAlbum.getUrl().equalsIgnoreCase(PictureAlbum.DASHBOARD)) {
             // likes don't apply to the dashboard
             posts = AccountManager.getAccountClient().userDashboard(options);
             // posts limit is set automatically
@@ -99,6 +96,7 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
             pictureAlbum.setPostsLimit(blog.getPostCount()); // limiting posts to actual posts count
         }
         pictureAlbum.increaseCurrentMaxPosts(limit);
+
         for (Post post : posts) {
             if (!isActual()) {
                 cancel(true);
