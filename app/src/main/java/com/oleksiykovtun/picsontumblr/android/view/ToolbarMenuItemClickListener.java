@@ -125,8 +125,11 @@ public class ToolbarMenuItemClickListener implements Toolbar.OnMenuItemClickList
     }
 
     private void search(View searchMenuLayout) {
-        String searchTags = "" + ((EditText) searchMenuLayout.findViewById(
-                R.id.edit_text_search)).getText();
+        // Allowed tags are groups of word characters separated by single hyphens
+        String searchTags = ((EditText) searchMenuLayout.findViewById(
+                R.id.edit_text_search)).getText().toString()
+                .replaceAll("\\W+", "-")
+                .replaceAll("^\\W+|\\W+$", "");
         boolean inNewPage = ((CheckBox) searchMenuLayout.findViewById(
                 R.id.checkbox_new_page)).isChecked() || SessionPresenter.getInstance().getPageCount() == 0;
 
