@@ -1,31 +1,44 @@
 package com.oleksiykovtun.picsontumblr.android.manager;
 
-import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
-import com.oleksiykovtun.picsontumblr.android.model.PictureHistory;
+import com.oleksiykovtun.picsontumblr.android.model.Picture;
+import com.oleksiykovtun.picsontumblr.android.util.SettingsUtil;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Loader and saver for PictureHistory
  */
 public class PictureHistoryManager {
 
-    private static final String TAG = "PictureHistory";
-    private static final String HISTORY = "PictureHistory";
+    private static final String TAG = "PictureHistoryManager";
+    private static final String TAG_HISTORY = "PictureHistory";
 
-    public static void loadHistory(Activity activity) {
-        PictureHistory.setAll(activity.getSharedPreferences("", Context.MODE_PRIVATE).
-                getStringSet(HISTORY, new HashSet<String>()));
-        Log.d(TAG, "Picture history loaded: " + PictureHistory.getSize() + " pics");
+    private static Set<String> shownPictureUrls = new HashSet<>();
+
+    public static void loadHistory() {
+        shownPictureUrls.clear();
+        shownPictureUrls.addAll(SettingsUtil.readPreferences(TAG_HISTORY));
+        Log.d(TAG, "Picture history loaded: " + getShownPictureCount() + " pics");
     }
 
-    public static void saveHistory(Activity activity) {
-        activity.getSharedPreferences("", Context.MODE_PRIVATE).edit().
-                putStringSet(HISTORY, PictureHistory.getAll()).commit();
-        Log.d(TAG, "Picture history saved: " + PictureHistory.getSize() + " pics");
+    public static void saveHistory() {
+        SettingsUtil.writePreferences(TAG_HISTORY, shownPictureUrls);
+        Log.d(TAG, "Picture history saved: " + getShownPictureCount() + " pics");
+    }
+
+    public static void markShown(Picture picture) {
+        shownPictureUrls.add(picture.getUrl());
+    }
+
+    public static boolean wasShown(Picture picture) {
+        return shownPictureUrls.contains(picture.getUrl());
+    }
+
+    private static int getShownPictureCount() {
+        return shownPictureUrls.size();
     }
 
 }

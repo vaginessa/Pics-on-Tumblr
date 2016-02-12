@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.oleksiykovtun.picsontumblr.android.App;
+import com.oleksiykovtun.picsontumblr.android.manager.PictureHistoryManager;
 import com.oleksiykovtun.picsontumblr.android.tasks.PictureAlbumLoadTask;
 import com.oleksiykovtun.picsontumblr.android.tasks.PictureLikeTask;
 import com.oleksiykovtun.picsontumblr.android.tasks.PictureReblogTask;
@@ -22,7 +23,7 @@ import com.oleksiykovtun.picsontumblr.android.manager.PictureSizeManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
 import com.oleksiykovtun.picsontumblr.android.model.PictureAlbum;
 import com.oleksiykovtun.picsontumblr.android.R;
-import com.oleksiykovtun.picsontumblr.android.model.PictureHistory;
+import com.oleksiykovtun.picsontumblr.android.util.MultiColumnViewUtil;
 import com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 import com.oleksiykovtun.picsontumblr.android.view.SwipeGestureProvider;
@@ -39,7 +40,6 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter implements Load
         PictureAlbumLoadTask.PictureAlbumLoadListener {
 
     private static final int CACHING_DISTANCE_IN_COLUMN = 10;
-    private static final int COLUMN_COUNT_DEFAULT = 2;
     private LoadableRecyclerView pictureAlbumRecyclerView;
     private PictureAlbum pictureAlbum;
 
@@ -84,7 +84,7 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter implements Load
                 (LoadableRecyclerView) inflater.inflate(R.layout.loadable_recycler_view, null);
         this.pictureAlbumRecyclerView.setLoadableRecyclerAdapter(this);
         this.pictureAlbumRecyclerView.setItemAnimator(null);
-        this.pictureAlbumRecyclerView.setColumnCount(COLUMN_COUNT_DEFAULT);
+        this.pictureAlbumRecyclerView.setColumnCount(MultiColumnViewUtil.getInitialColumnCount());
         this.pictureAlbumRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -113,7 +113,7 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter implements Load
         int position = pictureAlbumRecyclerView.getFirstCompletelyVisibleItemPosition();
         if (position >= 0 && position < dataSet.size()) {
             Picture lastCompletelyVisiblePicture = (Picture) dataSet.get(position);
-            PictureHistory.markShown(lastCompletelyVisiblePicture);
+            PictureHistoryManager.markShown(lastCompletelyVisiblePicture);
         }
     }
 
@@ -296,7 +296,7 @@ public class PictureAlbumAdapter extends LoadableRecyclerAdapter implements Load
         final Picture picture = (Picture) (dataSet.get(position));
         String label = new SimpleDateFormat("yyyy-MM-dd HH:mm")
                 .format(picture.getTimestamp());
-        if (PictureHistory.containsShown(picture)) {
+        if (PictureHistoryManager.wasShown(picture)) {
             label += "     Viewed";
             if (picture.getTimestamp() < pictureAlbum.getLastVisitTime()) {
                 label += " before";

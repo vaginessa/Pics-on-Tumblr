@@ -5,6 +5,7 @@ import android.support.v7.widget.Toolbar;
 import com.oleksiykovtun.picsontumblr.android.manager.AlbumHistoryManager;
 import com.oleksiykovtun.picsontumblr.android.model.ContentItem;
 import com.oleksiykovtun.picsontumblr.android.model.Session;
+import com.oleksiykovtun.picsontumblr.android.util.MultiColumnViewUtil;
 import com.oleksiykovtun.picsontumblr.android.view.ActionDynamicViewPager;
 import com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView;
 
@@ -120,6 +121,9 @@ public class SessionPresenter {
         LoadableRecyclerView recyclerView = (LoadableRecyclerView) viewPager.getCurrentView();
         if (recyclerView != null) {
             recyclerView.setColumnCount(recyclerView.getColumnCount() + difference);
+            if (MultiColumnViewUtil.allowsRememberingNumberOfColumns()) {
+                MultiColumnViewUtil.rememberNumberOfColumns(recyclerView.getColumnCount());
+            }
         }
     }
 

@@ -1,10 +1,9 @@
 package com.oleksiykovtun.picsontumblr.android.manager;
 
 
-import android.content.Context;
 import android.os.AsyncTask;
 
-import com.oleksiykovtun.picsontumblr.android.App;
+import com.oleksiykovtun.picsontumblr.android.util.SettingsUtil;
 
 /**
  * History of visited blogs
@@ -24,9 +23,8 @@ public class AlbumHistoryManager {
                 protected Void doInBackground(Void... params) {
                     try {
                         Thread.sleep(500);
-                        App.getContext().getSharedPreferences("", Context.MODE_PRIVATE).edit().
-                                putLong(TIMESTAMP_PREFIX + pictureAlbumName, System.currentTimeMillis()).
-                                commit();
+                        SettingsUtil.writePreferences(TIMESTAMP_PREFIX + pictureAlbumName,
+                                System.currentTimeMillis());
                     } catch (Throwable e) { }
                     return null;
                 }
@@ -39,7 +37,6 @@ public class AlbumHistoryManager {
     }
 
     public static long getLastVisitTime(String pictureAlbumName) {
-        return App.getContext().getSharedPreferences("", Context.MODE_PRIVATE).
-                getLong(TIMESTAMP_PREFIX + pictureAlbumName, 0);
+        return SettingsUtil.readPreferences(TIMESTAMP_PREFIX + pictureAlbumName, 0);
     }
 }

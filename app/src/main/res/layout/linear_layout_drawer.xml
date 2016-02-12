@@ -51,6 +51,13 @@
         android:textColor="@color/accent_material_dark"
         style="?android:attr/borderlessButtonStyle"/>
 
+    <Button android:id="@+id/button_settings"
+        android:text="Settings  "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_material_dark"
+        style="?android:attr/borderlessButtonStyle"/>
+
     <Button android:id="@+id/button_logout"
         android:text="Logout   "
         android:layout_width="wrap_content"

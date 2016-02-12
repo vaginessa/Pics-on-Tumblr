@@ -1,5 +1,7 @@
 package com.oleksiykovtun.picsontumblr.android.view;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
@@ -7,18 +9,27 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.internal.view.ContextThemeWrapper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
+import com.oleksiykovtun.picsontumblr.android.App;
 import com.oleksiykovtun.picsontumblr.android.R;
 import com.oleksiykovtun.picsontumblr.android.presenter.AlbumCollectionAdapter;
 import com.oleksiykovtun.picsontumblr.android.presenter.PictureAlbumAdapter;
 import com.oleksiykovtun.picsontumblr.android.manager.PictureHistoryManager;
 import com.oleksiykovtun.picsontumblr.android.manager.AccountManager;
 import com.oleksiykovtun.picsontumblr.android.presenter.SessionPresenter;
+import com.oleksiykovtun.picsontumblr.android.util.AppDownloadsUtil;
+import com.oleksiykovtun.picsontumblr.android.util.MultiColumnViewUtil;
+import com.oleksiykovtun.picsontumblr.android.util.SettingsUtil;
 import com.pnikosis.materialishprogress.ProgressWheel;
 
 import java.net.URL;
@@ -162,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setDrawerListeners();
-        PictureHistoryManager.loadHistory(this);
+        PictureHistoryManager.loadHistory();
     }
 
     private String getBlogNameFromIntent() {
@@ -183,7 +194,77 @@ public class MainActivity extends AppCompatActivity {
         sessionPresenter.addPagePresenter(new PictureAlbumAdapter(url, likesMode, false, false));
     }
 
+    private void openClearHistoryAndSettingsDialog() {
+        new AlertDialog.Builder(new ContextThemeWrapper(
+                MainActivity.get(), R.style.myDialog)).setTitle("Clear app data")
+                .setMessage("History of picture viewings, app's downloads folder and settings " +
+                        "will be cleared and you will be logged out. Are you sure?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SettingsUtil.clearAll();
+                        AppDownloadsUtil.deleteAll();
+                        dialog.dismiss();
+                        logout();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create().show();
+    }
+
+    private void openSettings() {
+        LayoutInflater inflater = (LayoutInflater) App.getContext()
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View settingsLayout = inflater.inflate(R.layout.linear_layout_settings, null);
+
+        final AlertDialog settingsDialog = new AlertDialog.Builder(new ContextThemeWrapper(
+                        MainActivity.get(), R.style.myDialog)).setView(settingsLayout)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .create();
+        settingsDialog.show();
+        settingsDialog.findViewById(R.id.button_clear_app_data).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        settingsDialog.dismiss();
+                        openClearHistoryAndSettingsDialog();
+                    }
+                });
+        CheckBox checkBoxColumns
+                = (CheckBox) settingsDialog.findViewById(R.id.checkbox_columns);
+        checkBoxColumns.setChecked(MultiColumnViewUtil.allowsRememberingNumberOfColumns());
+        checkBoxColumns.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                MultiColumnViewUtil.allowRememberingNumberOfColumns(isChecked);
+            }
+        });
+    }
+
+    private void logout() {
+        SessionPresenter.getInstance().closeAllPages();
+        AccountManager.revokeAuthorization();
+        AccountManager.startAuthorization();
+    }
+
     private void setDrawerListeners() {
+        findViewById(R.id.button_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSettings();
+                closeDrawer();
+            }
+        });
         findViewById(R.id.button_fullscreen).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -194,9 +275,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button_logout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SessionPresenter.getInstance().closeAllPages();
-                AccountManager.revokeAuthorization();
-                AccountManager.startAuthorization();
+                logout();
                 closeDrawer();
             }
         });
@@ -279,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         sessionPresenter.finishSession();
-        PictureHistoryManager.saveHistory(this);
+        PictureHistoryManager.saveHistory();
         super.onDestroy();
     }
 

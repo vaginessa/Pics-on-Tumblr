@@ -14,7 +14,6 @@ public class LoadableRecyclerView extends RecyclerView {
 
     private static final int ONE_COLUMN = 1;
     private static final int MAX_COLUMNS = 4;
-    private static final int COLUMN_COUNT_DEFAULT = 1;
 
     private int previousTotal = 0;
     private boolean loading = true;
@@ -25,7 +24,7 @@ public class LoadableRecyclerView extends RecyclerView {
     public void setLoadableRecyclerAdapter(LoadableRecyclerAdapter loadableRecyclerAdapter) {
         this.loadableRecyclerAdapter = loadableRecyclerAdapter;
         setAdapter(loadableRecyclerAdapter);
-        setColumnCount(COLUMN_COUNT_DEFAULT);
+        setColumnCount(1);
     }
 
     public void setColumnCount(int newColumnCount) {
