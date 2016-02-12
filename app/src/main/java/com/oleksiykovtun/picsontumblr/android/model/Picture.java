@@ -21,6 +21,7 @@ public class Picture extends ContentItem implements Serializable {
     private int postNumber;
     private long postId;
     private String reblogKey;
+    private int numberInPost;
 
     public boolean isLiked() {
         return isLiked;
@@ -46,6 +47,14 @@ public class Picture extends ContentItem implements Serializable {
         this.rebloggedFromName = rebloggedFromName;
     }
 
+    public int getNumberInPost() {
+        return numberInPost;
+    }
+
+    public void setNumberInPost(int numberInPost) {
+        this.numberInPost = numberInPost;
+    }
+
     public int getPostNumber() {
         return postNumber;
     }
@@ -66,6 +75,26 @@ public class Picture extends ContentItem implements Serializable {
         }
     }
 
+    public String getBiggestSizeUrl() {
+        return !getSizedPictures().isEmpty() ? getSizedPictures().get(0).getUrl() : "";
+    }
+
+    public String getBiggestSizeSecureUrl() {
+        return getSecure(getBiggestSizeUrl());
+    }
+
+    public String getSuggestedExtensionWithDot() {
+        int dotPosition = getUrl().lastIndexOf(".");
+        return (dotPosition >= 0) ? getUrl().substring(dotPosition) : "";
+    }
+
+    public String getSuggestedFileName() {
+        return getTitle()
+                + "_" + getPostId()
+                + ((getNumberInPost() > 0) ? ("_(" + (getNumberInPost() + 1) + ")") : "")
+                + getSuggestedExtensionWithDot();
+    }
+
     public long getTimestamp() {
         return timestamp;
     }
@@ -76,6 +105,14 @@ public class Picture extends ContentItem implements Serializable {
 
     public String getPostUrl() {
         return postUrl;
+    }
+
+    public String getPostSecureUrl() {
+        return getSecure(postUrl);
+    }
+
+    private static String getSecure(String path) {
+        return ("" + path).replace("http://", "https://");
     }
 
     public void setPostUrl(String postUrl) {

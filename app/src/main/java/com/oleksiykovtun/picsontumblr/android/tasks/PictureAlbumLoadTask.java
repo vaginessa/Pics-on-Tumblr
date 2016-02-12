@@ -105,7 +105,8 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
             if (post.getClass().equals(PhotoPost.class)) {
                 PhotoPost photoPost = (PhotoPost) post;
                 pictureAlbum.increaseCurrentPhotoPostCount(1);
-                for (Photo photo : photoPost.getPhotos()) {
+                for (int i = 0; i < photoPost.getPhotos().size(); ++i) {
+                    Photo photo = photoPost.getPhotos().get(i);
                     Picture picture = new Picture();
                     picture.setTitle(photoPost.getBlogName());
                     picture.setPostId(photoPost.getId());
@@ -119,6 +120,7 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
                     }
                     picture.setSizedPictures(sizedPictures);
                     picture.setPostUrl(photoPost.getPostUrl());
+                    picture.setNumberInPost(i);
 
                     // setting blog and source of this picture
                     String rebloggedFromUrl = photoPost.getRebloggedFromName();

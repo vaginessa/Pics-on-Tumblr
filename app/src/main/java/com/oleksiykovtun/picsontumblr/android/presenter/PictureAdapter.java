@@ -21,6 +21,8 @@ import com.oleksiykovtun.picsontumblr.android.tasks.PictureRemoveTask;
 import com.oleksiykovtun.picsontumblr.android.manager.PictureLoadManager;
 import com.oleksiykovtun.picsontumblr.android.manager.PictureSizeManager;
 import com.oleksiykovtun.picsontumblr.android.model.Picture;
+import com.oleksiykovtun.picsontumblr.android.util.AppDownloadsUtil;
+import com.oleksiykovtun.picsontumblr.android.util.ShareUtil;
 import com.oleksiykovtun.picsontumblr.android.view.LoadableRecyclerView;
 import com.oleksiykovtun.picsontumblr.android.view.MainActivity;
 import com.oleksiykovtun.picsontumblr.android.view.ScrollLockRecyclerView;
@@ -198,6 +200,34 @@ public class PictureAdapter extends LoadableRecyclerAdapter implements LoadableP
                             public void onClick(View v) {
                                 pictureMenuDialog.dismiss();
                                 new PictureReblogTask(PictureAdapter.this, picture).execute();
+                            }
+                        });
+                pictureMenuDialog.findViewById(R.id.button_browse_post).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                pictureMenuDialog.dismiss();
+                                ShareUtil.viewExternal(App.getContext(),
+                                        picture.getPostSecureUrl());
+                            }
+                        });
+                pictureMenuDialog.findViewById(R.id.button_share_picture).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                pictureMenuDialog.dismiss();
+                                ShareUtil.share(App.getContext(), "Share picture using",
+                                        picture.getBiggestSizeSecureUrl());
+                            }
+                        });
+                pictureMenuDialog.findViewById(R.id.button_save_picture).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                pictureMenuDialog.dismiss();
+                                AppDownloadsUtil.addImage(App.getContext(),
+                                        picture.getBiggestSizeSecureUrl(),
+                                        picture.getSuggestedFileName());
                             }
                         });
 

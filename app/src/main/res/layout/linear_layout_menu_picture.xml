@@ -7,4 +7,6 @@
 
     <include layout="@layout/linear_layout_buttons_reblog"/>
 
+    <include layout="@layout/linear_layout_buttons_sharing"/>
+
 </LinearLayout>

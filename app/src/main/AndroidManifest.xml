@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!--
     Icon generated: https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html#foreground.type=clipart&foreground.space.trim=0&foreground.space.pad=0.1&foreground.clipart=res%2Fclipart%2Ficons%2Fimage_panorama.svg&foreColor=00b4a3%2C100&crop=0&backgroundShape=square&backColor=636363%2C100&effects=shadow
@@ -23,9 +24,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <data android:host="*.tumblr.com"> </data>
-                <data android:scheme="http"></data>
-                <data android:pathPattern=".*"></data>
+                <data android:host="*.tumblr.com" />
+                <data android:scheme="http" />
+                <data android:pathPattern=".*" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
