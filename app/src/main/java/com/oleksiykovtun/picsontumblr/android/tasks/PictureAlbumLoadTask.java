@@ -52,11 +52,13 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
         }
         blog = AccountManager.getAccountClient().blogInfo(pictureAlbum.getUrl());
 
-        int blogItemCount = pictureAlbum.getUrl().equalsIgnoreCase(PictureAlbum.DASHBOARD)
-                ? PictureAlbum.DASHBOARD_LIMIT // todo limit if needed
-                : pictureAlbum.isShowLikesInsteadOfPosts()
-                    ? Math.min(PictureAlbum.LIKES_LIMIT, blog.getLikeCount())
-                    : blog.getPostCount();
+        int blogItemCount = pictureAlbum.isSearch()
+                ? 0
+                : pictureAlbum.getUrl().equalsIgnoreCase(PictureAlbum.DASHBOARD)
+                    ? PictureAlbum.DASHBOARD_LIMIT // todo limit if needed
+                    : pictureAlbum.isShowLikesInsteadOfPosts()
+                        ? Math.min(PictureAlbum.LIKES_LIMIT, blog.getLikeCount())
+                        : blog.getPostCount();
         int offset = pictureAlbum.isSearch()
                 ? 0
                 : pictureAlbum.isShowRandomly()
@@ -85,9 +87,13 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
             posts = AccountManager.getAccountClient().userDashboard(options);
             // posts limit is set automatically
         } else if (pictureAlbum.isSearch()) {
+            if (pictureAlbum.getCurrentMaxPosts() > 0) {
+                return; // search results are already there
+            }
             posts = AccountManager.getAccountClient().
                     tagged(pictureAlbum.getUrl(), options);
-            // no posts limit here, it's search
+            limit = posts.size();
+            pictureAlbum.setPostsLimit(posts.size()); // limiting posts to actual tags count
         } else if (pictureAlbum.isShowLikesInsteadOfPosts()) {
             posts = blog.likedPosts(options);
             pictureAlbum.setPostsLimit(blog.getLikeCount()); // limiting posts to actual likes count

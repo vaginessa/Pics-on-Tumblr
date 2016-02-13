@@ -15,6 +15,7 @@ public class PictureAlbum extends ContentItem implements Serializable {
     public static final String DASHBOARD = "dashboard";
     public static final int DASHBOARD_LIMIT = 250;
     public static final int LIKES_LIMIT = 1000;
+    public static final int SEARCH_LIMIT = 20;
     private static final int ABSOLUTE_LIMIT = 1000000;
 
     private String url;
@@ -76,6 +77,9 @@ public class PictureAlbum extends ContentItem implements Serializable {
 
     public PictureAlbum searchMode(boolean search) {
         this.search = search;
+        if (search) {
+            setPostsLimit(SEARCH_LIMIT);
+        }
         return this;
     }
 
@@ -159,6 +163,9 @@ public class PictureAlbum extends ContentItem implements Serializable {
         }
         if (showLikesInsteadOfPosts) {
             this.postsLimit = Math.min(LIKES_LIMIT, postsLimit);
+        }
+        if (search) {
+            this.postsLimit = Math.min(SEARCH_LIMIT, postsLimit);
         }
     }
 
