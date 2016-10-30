@@ -50,7 +50,9 @@ public class PictureAlbumLoadTask extends RepeatableOnErrorAsyncTask {
                     AccountManager.getAccountClient().user().getBlogs().get(0).getName();
             pictureAlbum.setUrl(myBlogName);
         }
-        blog = AccountManager.getAccountClient().blogInfo(pictureAlbum.getUrl());
+        if (!pictureAlbum.getUrl().equalsIgnoreCase(PictureAlbum.DASHBOARD)) {
+            blog = AccountManager.getAccountClient().blogInfo(pictureAlbum.getUrl());
+        }
 
         int blogItemCount = pictureAlbum.isSearch()
                 ? 0

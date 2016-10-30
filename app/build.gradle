@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "com.oleksiykovtun.picsontumblr.android"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 3
+        versionCode 4
         versionName "1.1"
     }
     buildTypes {
